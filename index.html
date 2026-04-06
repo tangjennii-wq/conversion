@@ -439,6 +439,7 @@ var S = {
   flashIdx:0, flipped:false, flashPool:null,
   chatMsgs:[], chatIn:"", chatBusy:false,
   surveyData:{}, mediaTab:"books", mediaProgress:{},
+  quizQuestions:null, quizIdx:0, quizPick:null, quizScore:0, quizDone:false, quizTotal:10,
   holidayIdx:0, lifecycleIdx:0, alefIdx:0,
   dyProgress:{}, tasksDone:{}
 };
@@ -480,6 +481,7 @@ function render(){
     {id:"home",icon:"🏠",label:"Home"},
     {id:"learn",icon:"📚",label:"Learn"},
     {id:"flash",icon:"🃏",label:"Cards"},
+    {id:"quiz",icon:"❓",label:"Quiz"},
     {id:"media",icon:"📖",label:"Media"},
     {id:"tracker",icon:"✅",label:"Tasks"},
     {id:"chat",icon:"💬",label:"Tutor"}
@@ -489,6 +491,7 @@ function render(){
   if(S.page==="home") h=renderHome();
   else if(S.page==="learn") h=S.subpage?renderSub():renderLearn();
   else if(S.page==="flash") h=renderFlash();
+  else if(S.page==="quiz") h=renderQuiz();
   else if(S.page==="media") h=renderMedia();
   else if(S.page==="tracker") h=renderTracker();
   else if(S.page==="chat") h=renderChat();
@@ -812,11 +815,14 @@ function renderFlash(){
   h+='<div style="font-size:12px;color:#888;margin-bottom:10px;text-align:center">Card '+(S.flashIdx+1)+' of '+S.flashPool.length+'</div>';
   h+='<div class="card flashcard" id="flashcard">';
   if(!S.flipped){
-    h+='<div class="hebrew" style="font-size:36px">'+card.h+'</div>';
-    h+='<div class="flip-hint">Tap to reveal</div>';
+    h+='<div class="translit" style="font-size:24px;font-weight:700;font-style:normal;color:#1a1a2e;margin-bottom:8px">'+card.t+'</div>';
+    h+='<div class="hebrew" style="font-size:28px;color:#888">'+card.h+'</div>';
+    h+='<div class="flip-hint">Tap to reveal meaning</div>';
   }else{
-    h+='<div class="translit" style="font-size:20px;margin-bottom:6px">'+card.t+'</div>';
-    h+='<div class="meaning" style="font-size:16px;text-align:center">'+card.m+'</div>';
+    h+='<div class="translit" style="font-size:18px;font-style:normal;color:#999;margin-bottom:4px">'+card.t+'</div>';
+    h+='<div class="hebrew" style="font-size:22px;color:#bbb;margin-bottom:10px">'+card.h+'</div>';
+    h+='<div style="width:60px;height:2px;background:#4caf50;border-radius:2px;margin:0 auto 10px"></div>';
+    h+='<div class="meaning" style="font-size:16px;text-align:center;font-weight:600">'+card.m+'</div>';
     if(card.c)h+='<div class="context" style="margin-top:10px;text-align:center">'+card.c+'</div>';
     h+='<button class="speak-btn" data-speak="'+esc(card.h)+'" style="margin-top:10px">🔊 Listen</button>';
   }
@@ -826,6 +832,111 @@ function renderFlash(){
   h+='<button class="btn btn-outline" id="flashPrev" style="flex:1">← Previous</button>';
   h+='<button class="btn btn-primary" id="flashNext" style="flex:1">Next →</button>';
   h+='</div>';
+  return h;
+}
+
+function generateQuiz(){
+  var pool=getAllCards();
+  if(pool.length<4)return;
+  var questions=[];
+  var used={};
+  var shuffled=shuffle(pool.slice());
+  for(var i=0;i<shuffled.length&&questions.length<S.quizTotal;i++){
+    var card=shuffled[i];
+    if(used[card.t])continue;
+    used[card.t]=true;
+    // Build 3 wrong answers from other cards
+    var wrongs=[];
+    var pool2=shuffle(pool.slice());
+    for(var j=0;j<pool2.length&&wrongs.length<3;j++){
+      if(pool2[j].t!==card.t&&!wrongs.some(function(w){return w===pool2[j].m})){
+        wrongs.push(pool2[j].m);
+      }
+    }
+    if(wrongs.length<3)continue;
+    // Random position for correct answer
+    var pos=Math.floor(Math.random()*4);
+    var opts=wrongs.slice();
+    opts.splice(pos,0,card.m);
+    // Random question type
+    var types=["translit_to_meaning","hebrew_to_meaning"];
+    var qtype=types[Math.floor(Math.random()*types.length)];
+    questions.push({card:card,opts:opts,correct:pos,type:qtype,picked:null});
+  }
+  return questions;
+}
+
+function renderQuiz(){
+  var h='<h2 style="margin-bottom:6px">Quiz</h2>';
+
+  // Not started or done — show start screen
+  if(!S.quizQuestions||S.quizDone){
+    if(S.quizDone&&S.quizQuestions){
+      var pct=Math.round(S.quizScore/S.quizQuestions.length*100);
+      var emoji=pct>=80?"🌟":pct>=60?"👍":pct>=40?"💪":"📚";
+      h+='<div class="card" style="text-align:center;padding:30px 20px">';
+      h+='<div style="font-size:48px;margin-bottom:10px">'+emoji+'</div>';
+      h+='<div style="font-size:24px;font-weight:700;margin-bottom:6px">'+S.quizScore+' / '+S.quizQuestions.length+'</div>';
+      h+='<div style="font-size:14px;color:#888;margin-bottom:16px">'+pct+'% correct'+(pct>=80?" — Amazing!":pct>=60?" — Great job!":pct>=40?" — Getting there!":" — Keep studying, you got this!")+'</div>';
+      h+='<button class="btn btn-primary" id="quizStart" style="margin-bottom:8px">🔄 New Quiz</button>';
+      h+='</div>';
+
+      // Show review
+      h+='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Review</div>';
+      S.quizQuestions.forEach(function(q,qi){
+        var gotIt=q.picked===q.correct;
+        h+='<div class="card" style="border-left:4px solid '+(gotIt?"#4caf50":"#e53935")+';padding:14px">';
+        h+='<div style="display:flex;justify-content:space-between;align-items:center"><div class="translit" style="font-size:15px;font-style:normal;font-weight:600">'+esc(q.card.t)+'</div><span style="font-size:18px">'+(gotIt?"✅":"❌")+'</span></div>';
+        h+='<div style="font-size:13px;color:#666;margin-top:4px">'+esc(q.card.m)+'</div>';
+        if(!gotIt)h+='<div style="font-size:12px;color:#e53935;margin-top:4px">You picked: '+esc(q.opts[q.picked])+'</div>';
+        h+='</div>';
+      });
+    }else{
+      h+='<p style="font-size:13px;color:#888;margin-bottom:16px">Test yourself on vocabulary, phrases, holidays, and prayers. No Hebrew letter recognition — just meanings!</p>';
+      h+='<div class="card" style="text-align:center;padding:30px 20px">';
+      h+='<div style="font-size:48px;margin-bottom:12px">📝</div>';
+      h+='<div style="font-size:16px;font-weight:600;margin-bottom:6px">Ready to test your knowledge?</div>';
+      h+='<div style="font-size:13px;color:#888;margin-bottom:16px">10 multiple choice questions from your study materials</div>';
+      h+='<button class="btn btn-primary" id="quizStart">Start Quiz</button>';
+      h+='</div>';
+    }
+    return h;
+  }
+
+  // Active quiz
+  var q=S.quizQuestions[S.quizIdx];
+  var total=S.quizQuestions.length;
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:13px;color:#888">Question '+(S.quizIdx+1)+' of '+total+'</div><div style="font-size:13px;font-weight:600;color:#4caf50">Score: '+S.quizScore+'</div></div>';
+  h+='<div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" style="width:'+Math.round((S.quizIdx/total)*100)+'%"></div></div>';
+
+  h+='<div class="card" style="padding:24px">';
+  h+='<div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">What does this mean?</div>';
+  if(q.type==="translit_to_meaning"){
+    h+='<div style="font-size:22px;font-weight:700;margin-bottom:6px;text-align:center">'+esc(q.card.t)+'</div>';
+    h+='<div class="hebrew" style="font-size:20px;color:#aaa;text-align:center;margin-bottom:16px">'+q.card.h+'</div>';
+  }else{
+    h+='<div class="hebrew" style="font-size:24px;text-align:center;margin-bottom:6px">'+q.card.h+'</div>';
+    h+='<div style="font-size:16px;color:#888;font-style:italic;text-align:center;margin-bottom:16px">'+esc(q.card.t)+'</div>';
+  }
+
+  q.opts.forEach(function(opt,oi){
+    var picked=q.picked!==null;
+    var isCorrect=oi===q.correct;
+    var isPicked=q.picked===oi;
+    var bg="#fff",border="#e0e0e0",color="#333",icon="";
+    if(picked){
+      if(isCorrect){bg="#e8f5e9";border="#4caf50";color="#2e7d32";icon=" ✅"}
+      else if(isPicked){bg="#ffebee";border="#e53935";color="#c62828";icon=" ❌"}
+      else{color="#ccc";border="#f0f0f0"}
+    }
+    h+='<button class="quiz-opt" data-qi="'+oi+'" '+(picked?"disabled":"")+' style="display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:8px;border-radius:12px;border:2px solid '+border+';background:'+bg+';color:'+color+';font-size:14px;font-family:inherit;cursor:'+(picked?"default":"pointer")+';transition:all .15s">'+esc(opt)+icon+'</button>';
+  });
+  h+='</div>';
+
+  if(q.picked!==null){
+    h+='<button class="btn btn-primary" id="quizNext" style="margin-top:8px">'+(S.quizIdx<total-1?"Next Question →":"See Results")+'</button>';
+  }
+
   return h;
 }
 
@@ -882,7 +993,6 @@ function getAllCards(){
   EVERYDAY.forEach(function(p){cards.push(p)});
   VOCAB.forEach(function(v){cards.push(v)});
   HOLIDAYS.forEach(function(ho){ho.phrases.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:ho.name})})});
-  ALEFBET.forEach(function(a){cards.push({h:a.h,t:a.t,m:a.m,c:"Sound: "+a.v})});
   // Add prayers to flashcard pool
   PRAYERS.shabbat.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:"Shabbat: "+p.name})});
   PRAYERS.conversion.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:"Conversion: "+p.name})});
@@ -1016,6 +1126,23 @@ function bindEvents(){
 
   // Generate report
   var gr=document.getElementById("genReport");if(gr)gr.onclick=generateReport;
+
+  // Quiz
+  var qs=document.getElementById("quizStart");
+  if(qs)qs.onclick=function(){S.quizQuestions=generateQuiz();S.quizIdx=0;S.quizPick=null;S.quizScore=0;S.quizDone=false;render()};
+  document.querySelectorAll(".quiz-opt").forEach(function(b){b.onclick=function(){
+    var qi=parseInt(b.dataset.qi);
+    var q=S.quizQuestions[S.quizIdx];
+    if(q.picked!==null)return;
+    q.picked=qi;
+    if(qi===q.correct)S.quizScore++;
+    render();
+  }});
+  var qn=document.getElementById("quizNext");
+  if(qn)qn.onclick=function(){
+    if(S.quizIdx<S.quizQuestions.length-1){S.quizIdx++;render()}
+    else{S.quizDone=true;render()}
+  };
 }
 
 // ═══════════════ INIT ═══════════════
