@@ -452,6 +452,147 @@ var CONVERSION_TASKS = [
   {id:"babkah",text:"Babkah! 🍫",done:false}
 ];
 
+// ═══════════════ PROFILES (encrypted, local) ═══════════════
+// Each profile stores its progress encrypted with a 4-digit PIN.
+// Storage layout:
+//   ivrit_profiles  -> JSON array of {name, salt} (salt is for key derivation)
+//   ivrit_p_<name>  -> {iv, ct} encrypted blob of progress data
+
+function b64e(buf){return btoa(String.fromCharCode.apply(null,new Uint8Array(buf)))}
+function b64d(str){var b=atob(str);var u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
+function randBytes(n){var u=new Uint8Array(n);crypto.getRandomValues(u);return u}
+
+function deriveKey(pin,saltB64){
+  var salt=b64d(saltB64);
+  return crypto.subtle.importKey("raw",new TextEncoder().encode(pin),{name:"PBKDF2"},false,["deriveKey"])
+    .then(function(km){
+      return crypto.subtle.deriveKey({name:"PBKDF2",salt:salt,iterations:100000,hash:"SHA-256"},km,{name:"AES-GCM",length:256},false,["encrypt","decrypt"]);
+    });
+}
+
+function encryptProgress(key,obj){
+  var iv=randBytes(12);
+  var data=new TextEncoder().encode(JSON.stringify(obj));
+  return crypto.subtle.encrypt({name:"AES-GCM",iv:iv},key,data).then(function(ct){
+    return{iv:b64e(iv),ct:b64e(ct)}
+  });
+}
+
+function decryptProgress(key,blob){
+  return crypto.subtle.decrypt({name:"AES-GCM",iv:b64d(blob.iv)},key,b64d(blob.ct))
+    .then(function(pt){return JSON.parse(new TextDecoder().decode(pt))});
+}
+
+function getProfiles(){
+  try{return JSON.parse(localStorage.getItem("ivrit_profiles")||"[]")}catch(e){return[]}
+}
+function saveProfiles(list){localStorage.setItem("ivrit_profiles",JSON.stringify(list))}
+
+function profileExists(name){return getProfiles().some(function(p){return p.name===name})}
+
+function createProfile(name,pin){
+  var salt=b64e(randBytes(16));
+  var list=getProfiles();
+  list.push({name:name,salt:salt});
+  saveProfiles(list);
+  return deriveKey(pin,salt).then(function(key){
+    return encryptProgress(key,{}).then(function(blob){
+      localStorage.setItem("ivrit_p_"+name,JSON.stringify(blob));
+      return key;
+    });
+  });
+}
+
+function loadProfile(name,pin){
+  var p=getProfiles().find(function(x){return x.name===name});
+  if(!p)return Promise.reject(new Error("no profile"));
+  return deriveKey(pin,p.salt).then(function(key){
+    var raw=localStorage.getItem("ivrit_p_"+name);
+    if(!raw)return{key:key,data:{}};
+    return decryptProgress(key,JSON.parse(raw)).then(function(data){return{key:key,data:data}});
+  });
+}
+
+function deleteProfile(name){
+  saveProfiles(getProfiles().filter(function(p){return p.name!==name}));
+  localStorage.removeItem("ivrit_p_"+name);
+}
+
+// Active profile (in memory only)
+var ACTIVE={name:null,key:null};
+
+function persistActive(){
+  if(!ACTIVE.key||!ACTIVE.name)return;
+  var data={
+    surveyData:S.surveyData,dyProgress:S.dyProgress,tasksDone:S.tasksDone,
+    mediaProgress:S.mediaProgress,deepLessons:S.deepLessons,
+    chatMsgs:S.chatMsgs
+  };
+  encryptProgress(ACTIVE.key,data).then(function(blob){
+    localStorage.setItem("ivrit_p_"+ACTIVE.name,JSON.stringify(blob));
+  });
+}
+
+function applyProfileData(data){
+  S.surveyData=data.surveyData||{};
+  S.dyProgress=data.dyProgress||{};
+  S.tasksDone=data.tasksDone||{};
+  S.mediaProgress=data.mediaProgress||{};
+  S.deepLessons=data.deepLessons||{};
+  S.chatMsgs=data.chatMsgs||[];
+}
+
+function logout(){
+  ACTIVE={name:null,key:null};
+  S.surveyData={};S.dyProgress={};S.tasksDone={};S.mediaProgress={};S.deepLessons={};
+  S.chatMsgs=[];S.quizLeaderboard={};
+  S.flashIdx=0;S.flipped=false;S.flashPool=null;
+  S.quizQuestions=null;S.quizIdx=0;S.quizScore=0;S.quizDone=false;
+  S.subpage=null;S.lessonView=null;
+  S.page="home";
+  // quizName stays — it's a device-level convenience, not per-profile
+  render();
+}
+
+// ═══════════════ SUPABASE ═══════════════
+var SUPABASE_URL="https://hfvtvoowoyyizxhgvisd.supabase.co";
+var SUPABASE_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhmdnR2b293b3l5aXp4aGd2aXNkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1MTI4NDIsImV4cCI6MjA5MTA4ODg0Mn0.QVoCBi_eEWidqC3AnghniZpr-RNDNHl_mdt5g7lLeVU";
+var SB_HEADERS={"apikey":SUPABASE_KEY,"Authorization":"Bearer "+SUPABASE_KEY,"Content-Type":"application/json"};
+
+function sbInsertScore(name,pct){
+  return fetch(SUPABASE_URL+"/rest/v1/quiz_scores",{
+    method:"POST",headers:SB_HEADERS,
+    body:JSON.stringify({name:name,pct:pct})
+  }).catch(function(e){console.error("sb insert",e)});
+}
+
+function sbFetchScores(){
+  return fetch(SUPABASE_URL+"/rest/v1/quiz_scores?select=name,pct,created_at&order=created_at.desc&limit=1000",{headers:SB_HEADERS})
+    .then(function(r){return r.json()})
+    .catch(function(e){console.error("sb fetch",e);return[]});
+}
+
+function loadLeaderboard(){
+  S.lbLoading=true;
+  sbFetchScores().then(function(rows){
+    var lb={};
+    (rows||[]).slice().reverse().forEach(function(r){
+      var n=r.name||"Anonymous";
+      if(!lb[n])lb[n]={scores:[],last:0,avg:0,count:0};
+      lb[n].scores.push(r.pct);
+      lb[n].last=r.pct;
+    });
+    Object.keys(lb).forEach(function(n){
+      var e=lb[n];
+      e.count=e.scores.length;
+      e.avg=Math.round(e.scores.reduce(function(a,b){return a+b},0)/e.count);
+    });
+    S.quizLeaderboard=lb;
+    S.lbLoading=false;
+    if(S.page==="quiz")render();
+  });
+}
+
 // ═══════════════ STATE ═══════════════
 var S = {
   page:"home", subpage:null,
@@ -459,19 +600,45 @@ var S = {
   chatMsgs:[], chatIn:"", chatBusy:false,
   surveyData:{}, mediaTab:"books", mediaProgress:{},
   quizQuestions:null, quizIdx:0, quizPick:null, quizScore:0, quizDone:false, quizTotal:10,
+  quizName:"", quizLeaderboard:{},
   lessonView:null, deepLessons:{}, deepBusy:false,
   holidayIdx:0, lifecycleIdx:0, alefIdx:0,
   dyProgress:{}, tasksDone:{}
 };
 
-// Load from localStorage
-try{
-  var saved=localStorage.getItem("ivrit_state");
-  if(saved){var p=JSON.parse(saved);S.surveyData=p.surveyData||{};S.dyProgress=p.dyProgress||{};S.tasksDone=p.tasksDone||{};S.mediaProgress=p.mediaProgress||{};S.deepLessons=p.deepLessons||{}}
-}catch(e){}
+// Plain localStorage load disabled — progress now lives in encrypted profiles.
+// Exception: quizName is a global (device-level) convenience, since the leaderboard
+// is intentionally shared across profiles.
+try{S.quizName=localStorage.getItem("ivrit_quiz_name")||""}catch(e){}
 
-function saveState(){
-  try{localStorage.setItem("ivrit_state",JSON.stringify({surveyData:S.surveyData,dyProgress:S.dyProgress,tasksDone:S.tasksDone,mediaProgress:S.mediaProgress,deepLessons:S.deepLessons}))}catch(e){}
+function saveState(){persistActive()}
+
+function recordQuizScore(name,pct){
+  name=(name||"Anonymous").trim()||"Anonymous";
+  if(!S.quizLeaderboard[name])S.quizLeaderboard[name]={scores:[],last:0,avg:0,count:0};
+  var e=S.quizLeaderboard[name];
+  e.scores.push(pct);
+  if(e.scores.length>50)e.scores.shift();
+  e.last=pct;
+  e.count=e.scores.length;
+  e.avg=Math.round(e.scores.reduce(function(a,b){return a+b},0)/e.count);
+  saveState();
+  sbInsertScore(name,pct).then(function(){setTimeout(loadLeaderboard,500)});
+}
+
+function renderLeaderboard(){
+  var entries=Object.keys(S.quizLeaderboard).map(function(n){var e=S.quizLeaderboard[n];return{name:n,last:e.last,avg:e.avg,count:e.count}});
+  if(!entries.length)return'';
+  entries.sort(function(a,b){return b.avg-a.avg});
+  var h='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px">🏆 Leaderboard</div>';
+  h+='<div class="card" style="padding:0;overflow:hidden">';
+  h+='<div style="display:grid;grid-template-columns:32px 1fr 60px 60px 50px;gap:8px;padding:10px 14px;background:#f5f3ee;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px"><div>#</div><div>Name</div><div style="text-align:right">Last</div><div style="text-align:right">Avg</div><div style="text-align:right">Quizzes</div></div>';
+  entries.forEach(function(e,i){
+    var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
+    h+='<div style="display:grid;grid-template-columns:32px 1fr 60px 60px 50px;gap:8px;padding:12px 14px;border-top:1px solid #eee;font-size:13px;align-items:center"><div style="font-weight:600">'+medal+'</div><div style="font-weight:600">'+esc(e.name)+'</div><div style="text-align:right;color:#666">'+e.last+'%</div><div style="text-align:right;font-weight:700;color:#4caf50">'+e.avg+'%</div><div style="text-align:right;color:#888">'+e.count+'</div></div>';
+  });
+  h+='</div>';
+  return h;
 }
 
 function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
@@ -493,10 +660,18 @@ function getKey(){
 // ═══════════════ RENDER ═══════════════
 function render(){
   var app=document.getElementById("app");
+  var nav=document.getElementById("nav");
   var h="";
 
+  // Profile gate — must pick a profile before using the app
+  if(!ACTIVE.name){
+    nav.innerHTML="";
+    app.innerHTML='<div class="fade-in">'+renderProfileGate()+'</div>';
+    bindProfileEvents();
+    return;
+  }
+
   // NAV
-  var nav=document.getElementById("nav");
   var tabs=[
     {id:"home",icon:"🏠",label:"Home"},
     {id:"learn",icon:"📚",label:"Learn"},
@@ -508,6 +683,9 @@ function render(){
   ];
   nav.innerHTML=tabs.map(function(t){return '<button class="'+(S.page===t.id?"active":"")+'" data-pg="'+t.id+'"><span class="ni">'+t.icon+'</span>'+t.label+'</button>'}).join("");
 
+  // Profile bar
+  var bar='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;font-size:12px;color:#888"><div>👤 <span style="font-weight:600;color:#444">'+esc(ACTIVE.name)+'</span></div><button id="logoutBtn" style="background:none;border:1px solid #e0ddd4;border-radius:8px;padding:4px 10px;font-size:11px;font-family:inherit;color:#888;cursor:pointer">Switch profile</button></div>';
+
   if(S.page==="home") h=renderHome();
   else if(S.page==="learn") h=S.subpage?renderSub():renderLearn();
   else if(S.page==="flash") h=renderFlash();
@@ -516,8 +694,81 @@ function render(){
   else if(S.page==="tracker") h=renderTracker();
   else if(S.page==="chat") h=renderChat();
 
-  app.innerHTML='<div class="fade-in">'+h+'</div>';
+  app.innerHTML='<div class="fade-in">'+bar+h+'</div>';
   bindEvents();
+  var lo=document.getElementById("logoutBtn");
+  if(lo)lo.onclick=logout;
+}
+
+function renderProfileGate(){
+  var profiles=getProfiles();
+  var mode=S.profileMode||(profiles.length?"login":"create");
+  var h='<div style="text-align:center;padding:30px 0 20px"><div style="font-size:48px;margin-bottom:8px">✡️</div><h1>Ivrit Journey</h1><p style="font-size:13px;color:#888;margin-top:6px">Your private conversion journey</p></div>';
+
+  h+='<div class="card" style="padding:24px">';
+
+  if(mode==="create"){
+    h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">Create your profile</div>';
+    h+='<div style="font-size:12px;color:#888;margin-bottom:16px">Your progress is encrypted with your PIN. Without it, no one — not even on this device — can see your data.</div>';
+    h+='<input id="pfName" type="text" placeholder="Your name" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box">';
+    h+='<input id="pfPin" type="password" inputmode="numeric" maxlength="4" placeholder="4-digit PIN" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
+    h+='<input id="pfPin2" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm PIN" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:14px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
+    if(S.profileErr)h+='<div style="font-size:12px;color:#e53935;margin-bottom:10px;text-align:center">'+esc(S.profileErr)+'</div>';
+    h+='<button class="btn btn-primary" id="pfCreate">Create profile</button>';
+    if(profiles.length)h+='<button class="btn btn-outline" id="pfBackToLogin" style="margin-top:8px">Back to sign in</button>';
+  }else{
+    h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">Welcome back</div>';
+    h+='<div style="font-size:12px;color:#888;margin-bottom:16px">Pick your profile and enter your PIN.</div>';
+    h+='<select id="pfSelect" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box">';
+    profiles.forEach(function(p){h+='<option value="'+esc(p.name)+'">'+esc(p.name)+'</option>'});
+    h+='</select>';
+    h+='<input id="pfPin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:14px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
+    if(S.profileErr)h+='<div style="font-size:12px;color:#e53935;margin-bottom:10px;text-align:center">'+esc(S.profileErr)+'</div>';
+    h+='<button class="btn btn-primary" id="pfLogin">Sign in</button>';
+    h+='<button class="btn btn-outline" id="pfNew" style="margin-top:8px">+ New profile</button>';
+  }
+  h+='</div>';
+  h+='<div style="font-size:11px;color:#aaa;text-align:center;margin-top:14px;line-height:1.5">⚠️ If you forget your PIN, your progress can\'t be recovered.<br>Profiles are stored only on this device.</div>';
+  return h;
+}
+
+function bindProfileEvents(){
+  var nb=document.getElementById("pfNew");
+  if(nb)nb.onclick=function(){S.profileMode="create";S.profileErr="";render()};
+  var bb=document.getElementById("pfBackToLogin");
+  if(bb)bb.onclick=function(){S.profileMode="login";S.profileErr="";render()};
+
+  var cb=document.getElementById("pfCreate");
+  if(cb)cb.onclick=function(){
+    var name=(document.getElementById("pfName").value||"").trim();
+    var pin=document.getElementById("pfPin").value;
+    var pin2=document.getElementById("pfPin2").value;
+    if(!name){S.profileErr="Please enter a name";render();return}
+    if(!/^\d{4}$/.test(pin)){S.profileErr="PIN must be 4 digits";render();return}
+    if(pin!==pin2){S.profileErr="PINs don't match";render();return}
+    if(profileExists(name)){S.profileErr="That name already exists";render();return}
+    createProfile(name,pin).then(function(key){
+      ACTIVE.name=name;ACTIVE.key=key;
+      applyProfileData({});
+      S.profileErr="";S.profileMode=null;
+      render();
+    });
+  };
+
+  var lb=document.getElementById("pfLogin");
+  if(lb)lb.onclick=function(){
+    var name=document.getElementById("pfSelect").value;
+    var pin=document.getElementById("pfPin").value;
+    if(!/^\d{4}$/.test(pin)){S.profileErr="PIN must be 4 digits";render();return}
+    loadProfile(name,pin).then(function(res){
+      ACTIVE.name=name;ACTIVE.key=res.key;
+      applyProfileData(res.data);
+      S.profileErr="";S.profileMode=null;
+      render();
+    }).catch(function(){
+      S.profileErr="Wrong PIN";render();
+    });
+  };
 }
 
 function renderHome(){
@@ -943,13 +1194,18 @@ function renderQuiz(){
   if(!S.quizQuestions||S.quizDone){
     if(S.quizDone&&S.quizQuestions){
       var pct=Math.round(S.quizScore/S.quizQuestions.length*100);
+      // Record score once
+      if(!S.quizRecorded){recordQuizScore(S.quizName,pct);S.quizRecorded=true}
       var emoji=pct>=80?"🌟":pct>=60?"👍":pct>=40?"💪":"📚";
       h+='<div class="card" style="text-align:center;padding:30px 20px">';
       h+='<div style="font-size:48px;margin-bottom:10px">'+emoji+'</div>';
+      h+='<div style="font-size:13px;color:#888;margin-bottom:4px">'+esc(S.quizName||"Anonymous")+'</div>';
       h+='<div style="font-size:24px;font-weight:700;margin-bottom:6px">'+S.quizScore+' / '+S.quizQuestions.length+'</div>';
       h+='<div style="font-size:14px;color:#888;margin-bottom:16px">'+pct+'% correct'+(pct>=80?" — Amazing!":pct>=60?" — Great job!":pct>=40?" — Getting there!":" — Keep studying, you got this!")+'</div>';
       h+='<button class="btn btn-primary" id="quizStart" style="margin-bottom:8px">🔄 New Quiz</button>';
       h+='</div>';
+
+      h+=renderLeaderboard();
 
       // Show review
       h+='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Review</div>';
@@ -967,8 +1223,10 @@ function renderQuiz(){
       h+='<div style="font-size:48px;margin-bottom:12px">📝</div>';
       h+='<div style="font-size:16px;font-weight:600;margin-bottom:6px">Ready to test your knowledge?</div>';
       h+='<div style="font-size:13px;color:#888;margin-bottom:16px">10 multiple choice questions from your study materials</div>';
-      h+='<button class="btn btn-primary" id="quizStart">Start Quiz</button>';
+      h+='<input id="quizNameIn" type="text" placeholder="Your name (optional)" value="'+esc(S.quizName||"")+'" style="width:100%;max-width:260px;padding:10px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;box-sizing:border-box">';
+      h+='<div><button class="btn btn-primary" id="quizStart">Start Quiz</button></div>';
       h+='</div>';
+      h+=renderLeaderboard();
     }
     return h;
   }
@@ -1112,9 +1370,10 @@ async function sendChat(){
   if(!S.chatIn.trim()||S.chatBusy)return;
   var key=getKey();if(!key)return;
   var msg=S.chatIn.trim();S.chatIn="";S.chatBusy=true;
-  S.chatMsgs.push({r:"u",t:msg});render();
+  S.chatMsgs.push({r:"u",t:msg});saveState();render();
   try{
-    var sys="You are a warm, patient, knowledgeable tutor helping a complete beginner learn Hebrew and Judaism for conversion (Reform tradition, Sephardic/Modern Israeli pronunciation). The student's name is Jenni. She is converting and studying with Rabbi Brian. Use transliteration alongside Hebrew script whenever you write Hebrew. Keep answers clear, concise, and encouraging. If she asks about prayers, include the Hebrew, transliteration, AND translation. Assume zero prior knowledge. Be encouraging and celebrate progress. If she asks about something you're not sure about, say so honestly.";
+    var studentName=ACTIVE.name||"the student";
+    var sys="You are a warm, patient, knowledgeable tutor helping a complete beginner learn Hebrew and Judaism for conversion (Reform tradition, Sephardic/Modern Israeli pronunciation). The student's name is "+studentName+". Use transliteration alongside Hebrew script whenever you write Hebrew. Keep answers clear, concise, and encouraging. If they ask about prayers, include the Hebrew, transliteration, AND translation. Assume zero prior knowledge. Be encouraging and celebrate progress. If they ask about something you're not sure about, say so honestly.";
     var msgs=S.chatMsgs.map(function(m){return{role:m.r==="u"?"user":"assistant",content:m.t}});
     var res=await fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
@@ -1129,17 +1388,17 @@ async function sendChat(){
     S.chatMsgs.push({r:"a",t:"Error: "+e.message});
     if(e.message.indexOf("401")>-1)localStorage.removeItem("anthropic_key");
   }
-  S.chatBusy=false;render();
+  S.chatBusy=false;saveState();render();
   setTimeout(function(){var el=document.getElementById("chatMsgs");if(el)el.scrollTop=el.scrollHeight},50);
 }
 
 // ═══════════════ EVENTS ═══════════════
 function bindEvents(){
   // Nav
-  document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){S.page=b.dataset.pg;S.subpage=null;S.flipped=false;render()}});
+  document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){S.page=b.dataset.pg;S.subpage=null;S.flipped=false;if(S.page==="quiz")loadLeaderboard();render()}});
 
   // Home quick links
-  document.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){S.page=b.dataset.go;render()}});
+  document.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){S.page=b.dataset.go;if(S.page==="quiz")loadLeaderboard();render()}});
 
   // Learn categories
   document.querySelectorAll("[data-sub]").forEach(function(b){b.onclick=function(){S.subpage=b.dataset.sub;render()}});
@@ -1225,7 +1484,11 @@ function bindEvents(){
 
   // Quiz
   var qs=document.getElementById("quizStart");
-  if(qs)qs.onclick=function(){S.quizQuestions=generateQuiz();S.quizIdx=0;S.quizPick=null;S.quizScore=0;S.quizDone=false;render()};
+  if(qs)qs.onclick=function(){
+    var ni=document.getElementById("quizNameIn");
+    if(ni){S.quizName=(ni.value||"").trim();try{localStorage.setItem("ivrit_quiz_name",S.quizName)}catch(e){}}
+    S.quizQuestions=generateQuiz();S.quizIdx=0;S.quizPick=null;S.quizScore=0;S.quizDone=false;S.quizRecorded=false;render();
+  };
   document.querySelectorAll(".quiz-opt").forEach(function(b){b.onclick=function(){
     var qi=parseInt(b.dataset.qi);
     var q=S.quizQuestions[S.quizIdx];
