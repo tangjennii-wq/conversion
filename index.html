@@ -701,31 +701,32 @@ function render(){
 }
 
 function renderProfileGate(){
-  var profiles=getProfiles();
-  var mode=S.profileMode||(profiles.length?"login":"create");
+  var mode=S.profileMode||"create";
   var h='<div style="text-align:center;padding:30px 0 20px"><div style="font-size:48px;margin-bottom:8px">✡️</div><h1>Ivrit Journey</h1><p style="font-size:13px;color:#888;margin-top:6px">Your private conversion journey</p></div>';
+
+  // Mode toggle
+  h+='<div style="display:flex;gap:6px;margin-bottom:14px;background:#f0ede5;padding:4px;border-radius:12px">';
+  h+='<button id="pfModeCreate" style="flex:1;padding:10px;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:'+(mode==="create"?"#fff":"transparent")+';color:'+(mode==="create"?"#1a1a2e":"#888")+';box-shadow:'+(mode==="create"?"0 1px 3px rgba(0,0,0,.08)":"none")+'">Create profile</button>';
+  h+='<button id="pfModeLogin" style="flex:1;padding:10px;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;background:'+(mode==="login"?"#fff":"transparent")+';color:'+(mode==="login"?"#1a1a2e":"#888")+';box-shadow:'+(mode==="login"?"0 1px 3px rgba(0,0,0,.08)":"none")+'">Sign in</button>';
+  h+='</div>';
 
   h+='<div class="card" style="padding:24px">';
 
   if(mode==="create"){
-    h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">Create your profile</div>';
-    h+='<div style="font-size:12px;color:#888;margin-bottom:16px">Your progress is encrypted with your PIN. Without it, no one — not even on this device — can see your data.</div>';
-    h+='<input id="pfName" type="text" placeholder="Your name" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box">';
-    h+='<input id="pfPin" type="password" inputmode="numeric" maxlength="4" placeholder="4-digit PIN" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
-    h+='<input id="pfPin2" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm PIN" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:14px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
+    h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">New here?</div>';
+    h+='<div style="font-size:12px;color:#888;margin-bottom:16px">Pick a username and a 4-digit PIN. Your progress will be encrypted with your PIN.</div>';
+    h+='<input id="pfName" type="text" placeholder="Choose a username" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box">';
+    h+='<input id="pfPin" type="password" inputmode="numeric" maxlength="4" placeholder="4-digit PIN" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
+    h+='<input id="pfPin2" type="password" inputmode="numeric" maxlength="4" placeholder="Confirm PIN" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:14px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
     if(S.profileErr)h+='<div style="font-size:12px;color:#e53935;margin-bottom:10px;text-align:center">'+esc(S.profileErr)+'</div>';
     h+='<button class="btn btn-primary" id="pfCreate">Create profile</button>';
-    if(profiles.length)h+='<button class="btn btn-outline" id="pfBackToLogin" style="margin-top:8px">Back to sign in</button>';
   }else{
     h+='<div style="font-size:16px;font-weight:700;margin-bottom:4px">Welcome back</div>';
-    h+='<div style="font-size:12px;color:#888;margin-bottom:16px">Pick your profile and enter your PIN.</div>';
-    h+='<select id="pfSelect" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box">';
-    profiles.forEach(function(p){h+='<option value="'+esc(p.name)+'">'+esc(p.name)+'</option>'});
-    h+='</select>';
-    h+='<input id="pfPin" type="password" inputmode="numeric" maxlength="4" placeholder="PIN" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:14px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
+    h+='<div style="font-size:12px;color:#888;margin-bottom:16px">Enter your username and PIN to continue your journey.</div>';
+    h+='<input id="pfName" type="text" placeholder="Your username" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:10px;box-sizing:border-box">';
+    h+='<input id="pfPin" type="password" inputmode="numeric" maxlength="4" placeholder="4-digit PIN" autocomplete="off" style="width:100%;padding:12px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:14px;box-sizing:border-box;letter-spacing:4px;text-align:center">';
     if(S.profileErr)h+='<div style="font-size:12px;color:#e53935;margin-bottom:10px;text-align:center">'+esc(S.profileErr)+'</div>';
     h+='<button class="btn btn-primary" id="pfLogin">Sign in</button>';
-    h+='<button class="btn btn-outline" id="pfNew" style="margin-top:8px">+ New profile</button>';
   }
   h+='</div>';
   h+='<div style="font-size:11px;color:#aaa;text-align:center;margin-top:14px;line-height:1.5">⚠️ If you forget your PIN, your progress can\'t be recovered.<br>Profiles are stored only on this device.</div>';
@@ -733,20 +734,20 @@ function renderProfileGate(){
 }
 
 function bindProfileEvents(){
-  var nb=document.getElementById("pfNew");
-  if(nb)nb.onclick=function(){S.profileMode="create";S.profileErr="";render()};
-  var bb=document.getElementById("pfBackToLogin");
-  if(bb)bb.onclick=function(){S.profileMode="login";S.profileErr="";render()};
+  var mc=document.getElementById("pfModeCreate");
+  if(mc)mc.onclick=function(){S.profileMode="create";S.profileErr="";render()};
+  var ml=document.getElementById("pfModeLogin");
+  if(ml)ml.onclick=function(){S.profileMode="login";S.profileErr="";render()};
 
   var cb=document.getElementById("pfCreate");
   if(cb)cb.onclick=function(){
     var name=(document.getElementById("pfName").value||"").trim();
     var pin=document.getElementById("pfPin").value;
     var pin2=document.getElementById("pfPin2").value;
-    if(!name){S.profileErr="Please enter a name";render();return}
+    if(!name){S.profileErr="Please choose a username";render();return}
     if(!/^\d{4}$/.test(pin)){S.profileErr="PIN must be 4 digits";render();return}
     if(pin!==pin2){S.profileErr="PINs don't match";render();return}
-    if(profileExists(name)){S.profileErr="That name already exists";render();return}
+    if(profileExists(name)){S.profileErr='"'+name+'" is already taken on this device — pick a different username';render();return}
     createProfile(name,pin).then(function(key){
       ACTIVE.name=name;ACTIVE.key=key;
       applyProfileData({});
@@ -757,9 +758,11 @@ function bindProfileEvents(){
 
   var lb=document.getElementById("pfLogin");
   if(lb)lb.onclick=function(){
-    var name=document.getElementById("pfSelect").value;
+    var name=(document.getElementById("pfName").value||"").trim();
     var pin=document.getElementById("pfPin").value;
+    if(!name){S.profileErr="Please enter your username";render();return}
     if(!/^\d{4}$/.test(pin)){S.profileErr="PIN must be 4 digits";render();return}
+    if(!profileExists(name)){S.profileErr="No profile with that username on this device";render();return}
     loadProfile(name,pin).then(function(res){
       ACTIVE.name=name;ACTIVE.key=res.key;
       applyProfileData(res.data);
@@ -769,6 +772,12 @@ function bindProfileEvents(){
       S.profileErr="Wrong PIN";render();
     });
   };
+
+  // Enter key submits
+  ["pfName","pfPin","pfPin2"].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.onkeydown=function(e){if(e.key==="Enter"){var btn=document.getElementById("pfCreate")||document.getElementById("pfLogin");if(btn)btn.click()}};
+  });
 }
 
 function renderHome(){
