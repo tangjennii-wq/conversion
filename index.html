@@ -526,7 +526,9 @@ function persistActive(){
   var data={
     surveyData:S.surveyData,dyProgress:S.dyProgress,tasksDone:S.tasksDone,
     mediaProgress:S.mediaProgress,deepLessons:S.deepLessons,
-    chatMsgs:S.chatMsgs
+    chatMsgs:S.chatMsgs,
+    flashBoxes:S.flashBoxes,
+    streak:S.streak
   };
   encryptProgress(ACTIVE.key,data).then(function(blob){
     localStorage.setItem("ivrit_p_"+ACTIVE.name,JSON.stringify(blob));
@@ -540,6 +542,8 @@ function applyProfileData(data){
   S.mediaProgress=data.mediaProgress||{};
   S.deepLessons=data.deepLessons||{};
   S.chatMsgs=data.chatMsgs||[];
+  S.flashBoxes=data.flashBoxes||{};
+  S.streak=data.streak||{count:0,lastDay:null,longest:0};
 }
 
 function logout(){
@@ -548,6 +552,9 @@ function logout(){
   S.chatMsgs=[];S.quizLeaderboard={};
   S.flashIdx=0;S.flipped=false;S.flashPool=null;
   S.quizQuestions=null;S.quizIdx=0;S.quizScore=0;S.quizDone=false;
+  S.flashBoxes={};
+  S.streak={count:0,lastDay:null,longest:0};
+  S.owlOpen=false;S.owlMsg=null;S.owlAiMsg=null;
   S.subpage=null;S.lessonView=null;
   S.page="home";
   // quizName stays — it's a device-level convenience, not per-profile
@@ -574,11 +581,17 @@ function sbFetchScores(){
 
 function loadLeaderboard(){
   S.lbLoading=true;
+  // BUGFIX: peak difficulty is stored locally (not in Supabase), so we need
+  // to merge it back in after reloading from the server. Without this merge,
+  // every quiz submission's reload would wipe the peak data and collapse the
+  // skill-weighted leaderboard to the default peak=3 fallback.
+  var peakCache={};
+  try{peakCache=JSON.parse(localStorage.getItem("ivrit_peaks")||"{}")}catch(e){}
   sbFetchScores().then(function(rows){
     var lb={};
     (rows||[]).slice().reverse().forEach(function(r){
       var n=r.name||"Anonymous";
-      if(!lb[n])lb[n]={scores:[],last:0,avg:0,count:0};
+      if(!lb[n])lb[n]={scores:[],last:0,avg:0,count:0,peak:peakCache[n]||0};
       lb[n].scores.push(r.pct);
       lb[n].last=r.pct;
     });
@@ -586,11 +599,244 @@ function loadLeaderboard(){
       var e=lb[n];
       e.count=e.scores.length;
       e.avg=Math.round(e.scores.reduce(function(a,b){return a+b},0)/e.count);
+      // Re-apply cached peak (was set above on creation, but make sure)
+      if(peakCache[n])e.peak=peakCache[n];
     });
     S.quizLeaderboard=lb;
     S.lbLoading=false;
     if(S.page==="quiz")render();
   });
+}
+
+// ═══════════════ ADAPTIVE ENGINE ═══════════════
+// Difficulty 1 (gentlest) → 5 (hardest). Used by both adaptive quiz scoring
+// and the leaderboard's skill-weighted ranking.
+
+// Heuristic: rate a knowledge question by its prompt + answer length and topic.
+// Longer / more specific answers and rarer topics rate harder. Tunable.
+function rateKnowledge(k){
+  var q=k.q.toLowerCase(),a=k.a.toLowerCase();
+  // Easiest: short, very common ("Shabbat","Shalom","13","Two")
+  if(/^(\d{1,2}|two|seven|nine|ten)$/.test(a))return 1;
+  if(/shabbat shalom|chag sameach|shalom|mazel tov|l'chaim|todah/.test(a))return 1;
+  // Hard: dates, specific text divisions, Aramaic, multi-word answers with parentheticals
+  if(/\d{4}/.test(a))return 5; // years
+  if(/aramaic|first and second temples|adar ii|ben\/bat|parchment scroll/.test(a))return 5;
+  if(a.length>40)return 5;
+  // Medium-hard: prayer names with disambiguation, multi-word concept answers
+  if(/shehecheyanu|amidah|kaddish|ner tamid|aron kodesh|tikkun olam|ketubah|chuppah|brit milah|hamotzi|kiddush|havdalah|midrash|tanakh|parsha|tefillin|mezuzah|tzitzit|tallit/.test(a))return 4;
+  // Easy-medium: single-word common terms
+  if(a.split(/\s+/).length<=2)return 2;
+  return 3;
+}
+
+// Vocab card difficulty: based on what list it came from + word length.
+function rateVocabCard(card){
+  var t=(card.t||"").toLowerCase();
+  // Everyday greetings — easy
+  if(/^(shalom|todah|b'vakashah|mazel tov|l'chaim)$/.test(t))return 1;
+  // Holiday names you hear constantly
+  if(/sameach|tovah|chanukah|pesach|seder|matzah|challah/.test(t))return 2;
+  // Yiddishisms and rare prayer terms — hardest
+  if(/streimel|kreplach|kvell|shiksa|schmuck|nosh|chutzpah|kavanah|keva|hamakom/.test(t))return 5;
+  // Multi-word phrases tend to be harder
+  if(t.split(/\s+/).length>=3)return 4;
+  // Long single words
+  if(t.length>=8)return 3;
+  return 2;
+}
+
+// Build adaptive flashcard pool using a Leitner-style SRS:
+// each card has a "box" 1-5; cards in low boxes appear far more often.
+// Returns an array of cards weighted by 1/box (capped to ~30 cards per session).
+function buildAdaptivePool(){
+  var all=getAllCards();
+  var weighted=[];
+  all.forEach(function(c){
+    var box=S.flashBoxes[c.t]||1;
+    // Weight: box 1 → 5 copies, box 2 → 3, box 3 → 2, box 4 → 1, box 5 → 0.5 (rounded → 1)
+    var w=Math.max(1,Math.round(6-box));
+    if(box>=5)w=1; // mastered cards still appear, just rarely
+    for(var i=0;i<w;i++)weighted.push(c);
+  });
+  // Shuffle and dedupe consecutively (avoid same card twice in a row)
+  weighted=shuffle(weighted);
+  var deduped=[];
+  for(var i=0;i<weighted.length;i++){
+    if(deduped.length===0||deduped[deduped.length-1].t!==weighted[i].t){
+      deduped.push(weighted[i]);
+    }
+  }
+  // Cap session length at 30
+  return deduped.slice(0,Math.min(30,deduped.length));
+}
+
+function bumpFlashBox(card,knewIt){
+  var cur=S.flashBoxes[card.t]||1;
+  if(knewIt){S.flashBoxes[card.t]=Math.min(5,cur+1)}
+  else{S.flashBoxes[card.t]=1} // missed = back to box 1
+  saveState();
+}
+
+// ═══════════════ STREAKS ═══════════════
+function todayStr(){
+  var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function daysBetween(a,b){
+  // a, b are YYYY-MM-DD
+  if(!a||!b)return 999;
+  var da=new Date(a+"T00:00:00"),db=new Date(b+"T00:00:00");
+  return Math.round((db-da)/86400000);
+}
+function bumpStreak(){
+  var t=todayStr();
+  if(!S.streak)S.streak={count:0,lastDay:null,longest:0};
+  if(S.streak.lastDay===t)return; // already counted today
+  var diff=daysBetween(S.streak.lastDay,t);
+  if(diff===1)S.streak.count++;
+  else S.streak.count=1; // reset (or first ever)
+  if(S.streak.count>(S.streak.longest||0))S.streak.longest=S.streak.count;
+  S.streak.lastDay=t;
+  saveState();
+}
+function streakStatus(){
+  // returns: 'active' (today done), 'risk' (yesterday done, today not yet), 'broken' (older), 'none'
+  if(!S.streak||!S.streak.lastDay)return "none";
+  var diff=daysBetween(S.streak.lastDay,todayStr());
+  if(diff===0)return "active";
+  if(diff===1)return "risk";
+  return "broken";
+}
+
+// ═══════════════ BAO THE PANDA ═══════════════
+// Local (no API) context-aware lines. Picks based on current state.
+function hootieLocalMessage(){
+  var lines=[];
+  var st=streakStatus();
+  if(st==="risk"){
+    var hour=new Date().getHours();
+    if(hour>=18)lines.push("Your "+S.streak.count+"-day streak ends at midnight. One flashcard saves it. Just one. I'm watching from the bamboo. 🎍");
+    else lines.push("Don't forget — your "+S.streak.count+"-day streak needs feeding today. A few cards will do it.");
+  }else if(st==="active"){
+    lines.push("Streak secured today. "+S.streak.count+" days and climbing. I'm proud of you. 🐼");
+  }else if(st==="broken"){
+    lines.push("Streak's reset, but the wisdom isn't. Pandas know about starting over — let's begin a new one with one flashcard right now.");
+  }else{
+    lines.push("Ni hao! Tap a flashcard or take a quiz to start your first streak.");
+  }
+  // Box-based nudges
+  var box1=0,total=0;
+  Object.keys(S.flashBoxes||{}).forEach(function(k){total++;if(S.flashBoxes[k]<=1)box1++});
+  if(total===0)lines.push("Your flashcard deck is fresh — every card starts in Box 1. Knowing one moves it up. Snack on a few?");
+  else if(box1>10)lines.push("You've got "+box1+" cards still in Box 1. The Leitner system says: see them often, they'll stick. Like bamboo to a panda.");
+  else if(box1<3&&total>10)lines.push("Most of your cards are in higher boxes. You're moving from learning to remembering. That's the harder, better part.");
+  // Quiz hints
+  if(!S.quizPeakDifficulty||S.quizPeakDifficulty<3)lines.push("Try a quiz — it adapts. Get questions right and the next ones get harder. Your peak difficulty shows on the leaderboard.");
+  else if(S.quizPeakDifficulty>=4)lines.push("You've hit difficulty "+S.quizPeakDifficulty+" on the quiz. That's not nothing. Rabbi Brian would be proud.");
+  // Pick one at random
+  return lines[Math.floor(Math.random()*lines.length)];
+}
+
+async function hootieAIMessage(){
+  var key=getKey();if(!key)return "(I need an Anthropic API key to be wise. Set one in the chat tutor first.)";
+  S.owlBusy=true;render();
+  var ctx={
+    streak:S.streak,
+    streakStatus:streakStatus(),
+    flashBoxCounts:(function(){
+      var c={1:0,2:0,3:0,4:0,5:0};
+      Object.keys(S.flashBoxes||{}).forEach(function(k){c[S.flashBoxes[k]||1]++});
+      return c;
+    })(),
+    tasksDone:Object.keys(S.tasksDone||{}).filter(function(k){return S.tasksDone[k]}).length,
+    quizPeak:S.quizPeakDifficulty||1,
+    timeOfDay:(function(){var h=new Date().getHours();return h<6?"early morning":h<12?"morning":h<17?"afternoon":h<21?"evening":"late night"})()
+  };
+  var sys="You are Bao (宝, 'treasure'), a wise and slightly mischievous panda who lives in the corner of Jenni's Reform Judaism conversion study app. Jenni is a complete beginner studying with Rabbi Brian. You speak in a warm, gently teacherly voice — a panda who has spent a lot of time chewing bamboo and thinking about Torah. Pandas are unhurried; you are too. Keep messages SHORT — 2-3 sentences max. Be specific to her current state (streak, flashcard boxes, time of day). Occasionally use one Hebrew word with translation, or very rarely a Mandarin word. Never lecture. Never use lists. Sign off with a small panda flourish only sometimes (not every message). You are encouraging but honest — if she's slacking, gently say so. Bamboo metaphors are welcome but don't overdo them.";
+  var user="Current state: "+JSON.stringify(ctx)+"\n\nGive me one short, contextual message based on this state. Just the message — no preamble.";
+  try{
+    var res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,system:sys,messages:[{role:"user",content:user}]})
+    });
+    if(!res.ok)throw new Error("API "+res.status);
+    var data=await res.json();
+    var reply=data.content.map(function(b){return b.text||""}).join("").trim();
+    S.owlAiMsg=reply;
+  }catch(e){
+    S.owlAiMsg="(Bao's wisdom couldn't load: "+e.message+")";
+  }
+  S.owlBusy=false;render();
+}
+
+function renderOwl(){
+  // Bao the panda — rendered into a body-level #mascot div, NOT inside #app.
+  // This avoids any containing-block weirdness from the .container or .fade-in
+  // animation transform, and it means the panda is also visible on the
+  // profile gate as a friendly greeting.
+  var mascot=document.getElementById("mascot");
+  if(!mascot){
+    mascot=document.createElement("div");
+    mascot.id="mascot";
+    document.body.appendChild(mascot);
+  }
+  var st=streakStatus();
+  var hasUrgent=st==="risk"&&new Date().getHours()>=18;
+
+  // Panda SVG: round white face, black ear patches, black eye patches with
+  // white eye highlights, small black nose. Sized 56x56 to fit a 62px button.
+  var pandaSvg='<svg width="56" height="56" viewBox="0 0 56 56" xmlns="http://www.w3.org/2000/svg">'+
+    // Ears (black circles peeking from top)
+    '<circle cx="14" cy="14" r="8" fill="#1a1a1a"/>'+
+    '<circle cx="42" cy="14" r="8" fill="#1a1a1a"/>'+
+    // Inner ear pink
+    '<circle cx="14" cy="14" r="3.5" fill="#f8bbd0"/>'+
+    '<circle cx="42" cy="14" r="3.5" fill="#f8bbd0"/>'+
+    // Head (white)
+    '<ellipse cx="28" cy="32" rx="22" ry="20" fill="#ffffff"/>'+
+    // Eye patches (black, tilted ovals — the iconic panda look)
+    '<ellipse cx="20" cy="26" rx="5.5" ry="7" fill="#1a1a1a" transform="rotate(-15 20 26)"/>'+
+    '<ellipse cx="36" cy="26" rx="5.5" ry="7" fill="#1a1a1a" transform="rotate(15 36 26)"/>'+
+    // Eyes (white inside the patches)
+    '<circle cx="21" cy="27" r="2.2" fill="#ffffff"/>'+
+    '<circle cx="35" cy="27" r="2.2" fill="#ffffff"/>'+
+    // Pupils
+    '<circle cx="21" cy="27" r="1.4" fill="#1a1a1a"/>'+
+    '<circle cx="35" cy="27" r="1.4" fill="#1a1a1a"/>'+
+    // Eye shine
+    '<circle cx="21.5" cy="26.4" r="0.5" fill="#ffffff"/>'+
+    '<circle cx="35.5" cy="26.4" r="0.5" fill="#ffffff"/>'+
+    // Nose
+    '<ellipse cx="28" cy="34" rx="2" ry="1.5" fill="#1a1a1a"/>'+
+    // Mouth (small smile)
+    '<path d="M 28 35.5 Q 28 38 25.5 38" stroke="#1a1a1a" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
+    '<path d="M 28 35.5 Q 28 38 30.5 38" stroke="#1a1a1a" stroke-width="1.2" fill="none" stroke-linecap="round"/>'+
+    '</svg>';
+
+  var badge=hasUrgent?'<div style="position:absolute;top:-2px;right:-2px;background:#e53935;color:#fff;font-size:10px;font-weight:700;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid #fff">!</div>':'';
+  var streakBadge=(S.streak&&S.streak.count>0)?'<div style="position:absolute;top:-6px;left:-6px;background:#fff;border:2px solid #4caf50;color:#4caf50;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.1)">🔥 '+S.streak.count+'</div>':'';
+  var btn='<button id="owlBtn" aria-label="Bao the panda" style="position:fixed;right:14px;bottom:78px;width:62px;height:62px;border-radius:50%;background:#f1f8e9;border:3px solid #4caf50;box-shadow:0 4px 16px rgba(0,0,0,.18);cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:9999;padding:0">'+pandaSvg+badge+streakBadge+'</button>';
+
+  var html=btn;
+  if(S.owlOpen){
+    var msg=S.owlAiMsg||S.owlMsg||hootieLocalMessage();
+    var panel='<div id="owlPanel" style="position:fixed;right:14px;bottom:148px;width:280px;background:#fff;border:2px solid #4caf50;border-radius:16px;padding:14px 16px;box-shadow:0 8px 24px rgba(0,0,0,.18);z-index:9999;font-size:13px;line-height:1.5;color:#1a1a2e">';
+    panel+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:11px;font-weight:700;color:#4caf50;text-transform:uppercase;letter-spacing:.5px">🐼 Bao says</div><button id="owlClose" style="background:none;border:none;font-size:18px;color:#999;cursor:pointer;padding:0;line-height:1">×</button></div>';
+    if(S.owlBusy)panel+='<div style="color:#888;font-style:italic">Bao is thinking...</div>';
+    else panel+='<div>'+esc(msg)+'</div>';
+    panel+='<div style="display:flex;gap:6px;margin-top:10px">';
+    panel+='<button id="owlAi" '+(S.owlBusy?"disabled":"")+' style="flex:1;background:#4caf50;color:#fff;border:none;border-radius:8px;padding:8px;font-size:12px;font-weight:600;font-family:inherit;cursor:'+(S.owlBusy?"default":"pointer")+'">Ask Bao ✨</button>';
+    panel+='<button id="owlNew" style="flex:1;background:#fff;color:#4caf50;border:1.5px solid #4caf50;border-radius:8px;padding:8px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">New tip</button>';
+    panel+='</div>';
+    panel+='<div style="font-size:10px;color:#bbb;margin-top:8px;text-align:center">"Ask Bao" uses your Anthropic key for a personalized message.</div>';
+    panel+='</div>';
+    html+=panel;
+  }
+
+  mascot.innerHTML=html;
+  return ""; // we render directly into #mascot, return empty so callers can still concatenate
 }
 
 // ═══════════════ STATE ═══════════════
@@ -603,7 +849,16 @@ var S = {
   quizName:"", quizLeaderboard:{},
   lessonView:null, deepLessons:{}, deepBusy:false,
   holidayIdx:0, lifecycleIdx:0, alefIdx:0,
-  dyProgress:{}, tasksDone:{}
+  dyProgress:{}, tasksDone:{},
+  // Adaptive quiz state
+  quizDifficulty:2, quizPointsEarned:0, quizPointsPossible:0, quizPeakDifficulty:1,
+  quizLastDifficulty:[], // history per question for review
+  // Adaptive flashcards (Leitner SRS)
+  flashBoxes:{}, // {translit: boxNumber 1-5}
+  // Daily streak
+  streak:{count:0, lastDay:null, longest:0},
+  // Hootie the owl
+  owlOpen:false, owlMsg:null, owlBusy:false, owlAiMsg:null
 };
 
 // Plain localStorage load disabled — progress now lives in encrypted profiles.
@@ -615,29 +870,54 @@ function saveState(){persistActive()}
 
 function recordQuizScore(name,pct){
   name=(name||"Anonymous").trim()||"Anonymous";
-  if(!S.quizLeaderboard[name])S.quizLeaderboard[name]={scores:[],last:0,avg:0,count:0};
+  if(!S.quizLeaderboard[name])S.quizLeaderboard[name]={scores:[],last:0,avg:0,count:0,peak:1};
   var e=S.quizLeaderboard[name];
   e.scores.push(pct);
   if(e.scores.length>50)e.scores.shift();
   e.last=pct;
   e.count=e.scores.length;
   e.avg=Math.round(e.scores.reduce(function(a,b){return a+b},0)/e.count);
+  // Track peak difficulty reached. Persisted in a localStorage side-cache
+  // (keyed by name) so it survives leaderboard refreshes from Supabase.
+  if(!e.peak||S.quizPeakDifficulty>e.peak)e.peak=S.quizPeakDifficulty||1;
+  try{
+    var pc=JSON.parse(localStorage.getItem("ivrit_peaks")||"{}");
+    if(!pc[name]||e.peak>pc[name])pc[name]=e.peak;
+    localStorage.setItem("ivrit_peaks",JSON.stringify(pc));
+  }catch(err){}
   saveState();
   sbInsertScore(name,pct).then(function(){setTimeout(loadLeaderboard,500)});
 }
 
 function renderLeaderboard(){
-  var entries=Object.keys(S.quizLeaderboard).map(function(n){var e=S.quizLeaderboard[n];return{name:n,last:e.last,avg:e.avg,count:e.count}});
+  var entries=Object.keys(S.quizLeaderboard).map(function(n){
+    var e=S.quizLeaderboard[n];
+    var hasPeak=!!e.peak;
+    var peak=e.peak||3; // default for Supabase-hydrated entries with no local peak
+    // Skill-weighted score: monotonic in (avg, peak). A 100% at peak 5 outranks
+    // a 100% at peak 1, but a 100% at peak 5 always outranks any score below it
+    // at the same peak. This is the leaderboard invariant: better → higher.
+    var weighted=e.avg*(1+0.15*(peak-1));
+    return{name:n,last:e.last,avg:e.avg,count:e.count,peak:peak,hasPeak:hasPeak,weighted:Math.round(weighted)};
+  });
   if(!entries.length)return'';
-  entries.sort(function(a,b){return b.avg-a.avg});
-  var h='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px">🏆 Leaderboard</div>';
+  entries.sort(function(a,b){return b.weighted-a.weighted});
+  var h='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px">🏆 Leaderboard <span style="font-weight:500;text-transform:none;color:#aaa">(skill-weighted)</span></div>';
   h+='<div class="card" style="padding:0;overflow:hidden">';
-  h+='<div style="display:grid;grid-template-columns:32px 1fr 60px 60px 50px;gap:8px;padding:10px 14px;background:#f5f3ee;font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px"><div>#</div><div>Name</div><div style="text-align:right">Last</div><div style="text-align:right">Avg</div><div style="text-align:right">Quizzes</div></div>';
+  h+='<div style="display:grid;grid-template-columns:28px 1fr 44px 44px 44px 36px;gap:6px;padding:10px 12px;background:#f5f3ee;font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px"><div>#</div><div>Name</div><div style="text-align:right">Avg</div><div style="text-align:right">Peak</div><div style="text-align:right">Score</div><div style="text-align:right">N</div></div>';
   entries.forEach(function(e,i){
     var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
-    h+='<div style="display:grid;grid-template-columns:32px 1fr 60px 60px 50px;gap:8px;padding:12px 14px;border-top:1px solid #eee;font-size:13px;align-items:center"><div style="font-weight:600">'+medal+'</div><div style="font-weight:600">'+esc(e.name)+'</div><div style="text-align:right;color:#666">'+e.last+'%</div><div style="text-align:right;font-weight:700;color:#4caf50">'+e.avg+'%</div><div style="text-align:right;color:#888">'+e.count+'</div></div>';
+    var peakDots="";
+    if(e.hasPeak){
+      for(var d=1;d<=5;d++)peakDots+='<span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:'+(d<=e.peak?"#f9a825":"#eee")+';margin-right:1px"></span>';
+    }else{
+      // Unknown peak (legacy Supabase entry, no local cache)
+      peakDots='<span style="font-size:11px;color:#ccc">—</span>';
+    }
+    h+='<div style="display:grid;grid-template-columns:28px 1fr 44px 44px 44px 36px;gap:6px;padding:11px 12px;border-top:1px solid #eee;font-size:12px;align-items:center"><div style="font-weight:600">'+medal+'</div><div style="font-weight:600;font-size:13px">'+esc(e.name)+'</div><div style="text-align:right;color:#666">'+e.avg+'%</div><div style="text-align:right">'+peakDots+'</div><div style="text-align:right;font-weight:700;color:#4caf50">'+e.weighted+'</div><div style="text-align:right;color:#888">'+e.count+'</div></div>';
   });
   h+='</div>';
+  h+='<div style="font-size:10px;color:#aaa;margin:6px 4px 0;line-height:1.5">Score = avg × (1 + 0.15 × (peak − 1)). Harder questions earn more — better students always rank higher.</div>';
   return h;
 }
 
@@ -668,6 +948,8 @@ function render(){
     nav.innerHTML="";
     app.innerHTML='<div class="fade-in">'+renderProfileGate()+'</div>';
     bindProfileEvents();
+    renderOwl();      // Bao greets you on the profile gate too
+    bindOwlEvents();
     return;
   }
 
@@ -684,7 +966,13 @@ function render(){
   nav.innerHTML=tabs.map(function(t){return '<button class="'+(S.page===t.id?"active":"")+'" data-pg="'+t.id+'"><span class="ni">'+t.icon+'</span>'+t.label+'</button>'}).join("");
 
   // Profile bar
-  var bar='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;font-size:12px;color:#888"><div>👤 <span style="font-weight:600;color:#444">'+esc(ACTIVE.name)+'</span></div><button id="logoutBtn" style="background:none;border:1px solid #e0ddd4;border-radius:8px;padding:4px 10px;font-size:11px;font-family:inherit;color:#888;cursor:pointer">Switch profile</button></div>';
+  var streakBit="";
+  if(S.streak&&S.streak.count>0){
+    var st=streakStatus();
+    var color=st==="active"?"#4caf50":st==="risk"?"#f9a825":"#999";
+    streakBit=' · <span style="color:'+color+';font-weight:600">🔥 '+S.streak.count+'</span>';
+  }
+  var bar='<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 4px;font-size:12px;color:#888"><div>👤 <span style="font-weight:600;color:#444">'+esc(ACTIVE.name)+'</span>'+streakBit+'</div><button id="logoutBtn" style="background:none;border:1px solid #e0ddd4;border-radius:8px;padding:4px 10px;font-size:11px;font-family:inherit;color:#888;cursor:pointer">Switch profile</button></div>';
 
   if(S.page==="home") h=renderHome();
   else if(S.page==="learn") h=S.subpage?renderSub():renderLearn();
@@ -695,7 +983,9 @@ function render(){
   else if(S.page==="chat") h=renderChat();
 
   app.innerHTML='<div class="fade-in">'+bar+h+'</div>';
+  renderOwl();
   bindEvents();
+  bindOwlEvents();
   var lo=document.getElementById("logoutBtn");
   if(lo)lo.onclick=logout;
 }
@@ -1136,13 +1426,32 @@ function renderMedia(){
 }
 
 function renderFlash(){
-  var pool=getAllCards();
-  if(!S.flashPool)S.flashPool=shuffle(pool.slice());
-  if(S.flashIdx>=S.flashPool.length){S.flashIdx=0;S.flashPool=shuffle(pool.slice())}
+  // ADAPTIVE FLASHCARDS — Leitner SRS
+  // Pool is built from buildAdaptivePool() which weights cards by box (1-5).
+  // Cards in box 1 appear most often; mastered cards (box 5) appear rarely.
+  if(!S.flashPool)S.flashPool=buildAdaptivePool();
+  if(!S.flashPool.length){S.flashPool=buildAdaptivePool()}
+  if(S.flashIdx>=S.flashPool.length){S.flashIdx=0;S.flashPool=buildAdaptivePool()}
   var card=S.flashPool[S.flashIdx];
+  var box=S.flashBoxes[card.t]||1;
 
-  var h='<h2 style="margin-bottom:14px">Flashcards</h2>';
-  h+='<div style="font-size:12px;color:#888;margin-bottom:10px;text-align:center">Card '+(S.flashIdx+1)+' of '+S.flashPool.length+'</div>';
+  // Box distribution summary
+  var boxCounts={1:0,2:0,3:0,4:0,5:0};
+  Object.keys(S.flashBoxes||{}).forEach(function(k){boxCounts[S.flashBoxes[k]||1]++});
+  var totalKnown=Object.keys(S.flashBoxes||{}).length;
+
+  var h='<h2 style="margin-bottom:6px">Flashcards</h2>';
+  h+='<p style="font-size:12px;color:#888;margin-bottom:10px">Adaptive review · cards you miss come back sooner</p>';
+  // Box meter
+  h+='<div style="display:flex;gap:4px;margin-bottom:12px;font-size:10px">';
+  for(var b=1;b<=5;b++){
+    var bgC=b===1?"#ffebee":b===2?"#fff8e1":b===3?"#fff3e0":b===4?"#e8f5e9":"#e8eaf6";
+    var fgC=b===1?"#c62828":b===2?"#f57f17":b===3?"#e65100":b===4?"#2e7d32":"#283593";
+    h+='<div style="flex:1;background:'+bgC+';color:'+fgC+';padding:6px 4px;border-radius:6px;text-align:center;font-weight:600">Box '+b+'<br>'+boxCounts[b]+'</div>';
+  }
+  h+='</div>';
+  h+='<div style="font-size:12px;color:#888;margin-bottom:10px;text-align:center">Card '+(S.flashIdx+1)+' of '+S.flashPool.length+' · this card is in <b style="color:#f9a825">Box '+box+'</b></div>';
+
   h+='<div class="card flashcard" id="flashcard">';
   if(!S.flipped){
     h+='<div class="translit" style="font-size:24px;font-weight:700;font-style:normal;color:#1a1a2e;margin-bottom:8px">'+card.t+'</div>';
@@ -1158,9 +1467,17 @@ function renderFlash(){
   }
   h+='</div>';
 
+  if(S.flipped){
+    // Knew it / Missed it — Leitner controls
+    h+='<div style="display:flex;gap:10px;margin-bottom:10px">';
+    h+='<button class="btn" id="flashMissed" style="flex:1;background:#ffebee;color:#c62828;border:2px solid #ef9a9a">😬 Missed it</button>';
+    h+='<button class="btn" id="flashKnew" style="flex:1;background:#e8f5e9;color:#2e7d32;border:2px solid #a5d6a7">✓ Knew it</button>';
+    h+='</div>';
+  }
+
   h+='<div style="display:flex;gap:10px">';
   h+='<button class="btn btn-outline" id="flashPrev" style="flex:1">← Previous</button>';
-  h+='<button class="btn btn-primary" id="flashNext" style="flex:1">Next →</button>';
+  h+='<button class="btn btn-primary" id="flashNext" style="flex:1">'+(S.flipped?"Skip →":"Next →")+'</button>';
   h+='</div>';
   return h;
 }
@@ -1264,49 +1581,142 @@ var KNOWLEDGE_BANK = [
 ];
 
 function generateQuiz(){
-  var questions=[];
-  // Roughly 60% knowledge, 40% vocab for a real knowledge quiz feel
-  var knowledgeCount=Math.ceil(S.quizTotal*0.6);
-  var vocabCount=S.quizTotal-knowledgeCount;
+  // ADAPTIVE QUIZ GENERATION
+  // Build a pool of all possible questions, each tagged with a difficulty (1-5).
+  // generateQuiz returns the FULL pool sorted by difficulty buckets;
+  // the active question for each step is chosen at click-time based on
+  // current S.quizDifficulty (so it's truly adaptive, not pre-baked).
+  // We reset the adaptive state here.
+  S.quizDifficulty=2;
+  S.quizPointsEarned=0;
+  S.quizPointsPossible=0;
+  S.quizPeakDifficulty=1;
+  S.quizLastDifficulty=[];
 
-  // Knowledge questions from the bank
-  var kShuffled=shuffle(KNOWLEDGE_BANK.slice());
-  for(var i=0;i<kShuffled.length&&questions.length<knowledgeCount;i++){
-    var k=kShuffled[i];
+  var pool=[];
+
+  // Knowledge questions
+  KNOWLEDGE_BANK.forEach(function(k){
     var kopts=k.w.slice();
     var kpos=Math.floor(Math.random()*4);
     kopts.splice(kpos,0,k.a);
-    questions.push({type:"knowledge",prompt:k.q,opts:kopts,correct:kpos,answer:k.a,picked:null});
-  }
+    pool.push({type:"knowledge",prompt:k.q,opts:kopts,correct:kpos,answer:k.a,picked:null,difficulty:rateKnowledge(k)});
+  });
 
-  // Vocab questions from the card pool
-  var pool=getAllCards();
-  var used={};
-  var vShuffled=shuffle(pool.slice());
-  var added=0;
-  for(var j=0;j<vShuffled.length&&added<vocabCount;j++){
-    var card=vShuffled[j];
-    if(used[card.t])continue;
-    used[card.t]=true;
+  // Vocab questions
+  var cards=getAllCards();
+  cards.forEach(function(card){
     var wrongs=[];
-    var pool2=shuffle(pool.slice());
+    var pool2=shuffle(cards.slice());
     for(var m=0;m<pool2.length&&wrongs.length<3;m++){
       if(pool2[m].t!==card.t&&pool2[m].m!==card.m&&!wrongs.some(function(w){return w===pool2[m].m})){
         wrongs.push(pool2[m].m);
       }
     }
-    if(wrongs.length<3)continue;
+    if(wrongs.length<3)return;
     var vpos=Math.floor(Math.random()*4);
     var vopts=wrongs.slice();
     vopts.splice(vpos,0,card.m);
-    var types=["translit_to_meaning","hebrew_to_meaning"];
-    var qtype=types[Math.floor(Math.random()*types.length)];
-    questions.push({type:"vocab",subtype:qtype,card:card,opts:vopts,correct:vpos,picked:null});
-    added++;
+    var qtype=Math.random()<0.5?"translit_to_meaning":"hebrew_to_meaning";
+    pool.push({type:"vocab",subtype:qtype,card:card,opts:vopts,correct:vpos,picked:null,difficulty:rateVocabCard(card)});
+  });
+
+  // Bucket by difficulty for fast adaptive selection
+  var buckets={1:[],2:[],3:[],4:[],5:[]};
+  pool.forEach(function(q){buckets[q.difficulty].push(q)});
+  Object.keys(buckets).forEach(function(k){buckets[k]=shuffle(buckets[k])});
+
+  // Build the actual quiz: pick S.quizTotal questions, starting at difficulty 2,
+  // adapting up/down. We pre-pick the FIRST question only; the rest are picked
+  // at answer-time inside the click handler so difficulty truly responds to perf.
+  var questions=[];
+  var used={};
+  function takeAtDifficulty(d){
+    // Try the requested bucket; if empty, walk outward.
+    for(var off=0;off<5;off++){
+      for(var s=-1;s<=1;s+=2){
+        var dd=d+off*s;
+        if(dd<1||dd>5)continue;
+        while(buckets[dd].length){
+          var q=buckets[dd].pop();
+          var key=q.type+"|"+(q.prompt||(q.card&&q.card.t));
+          if(used[key])continue;
+          used[key]=true;
+          return q;
+        }
+      }
+    }
+    return null;
   }
 
-  // Interleave knowledge and vocab
-  return shuffle(questions);
+  // Pre-fill the queue but mark each slot with target difficulty.
+  // We'll actually swap them out adaptively as the user answers.
+  for(var i=0;i<S.quizTotal;i++){
+    var q=takeAtDifficulty(2); // placeholder difficulty; replaced on the fly
+    if(q)questions.push(q);
+  }
+
+  // Stash buckets on the questions array for adaptive replacement
+  questions._buckets=buckets;
+  questions._used=used;
+  return questions;
+}
+
+// Called when the user picks an option. Updates score, adapts difficulty,
+// and swaps the NEXT question's difficulty target if possible.
+function adaptiveAnswer(qi){
+  var q=S.quizQuestions[S.quizIdx];
+  if(q.picked!==null)return;
+  q.picked=qi;
+  var correct=qi===q.correct;
+  var d=q.difficulty;
+  var pts=d*d; // difficulty² points
+  S.quizPointsPossible+=pts;
+  if(correct){
+    S.quizPointsEarned+=pts;
+    S.quizScore++;
+    S.quizDifficulty=Math.min(5,d+1);
+  }else{
+    S.quizDifficulty=Math.max(1,d-1);
+  }
+  if(d>S.quizPeakDifficulty)S.quizPeakDifficulty=d;
+  S.quizLastDifficulty.push(d);
+
+  // Swap the NEXT question to match the new target difficulty
+  var nextIdx=S.quizIdx+1;
+  if(nextIdx<S.quizQuestions.length&&S.quizQuestions._buckets){
+    var target=S.quizDifficulty;
+    var buckets=S.quizQuestions._buckets;
+    var used=S.quizQuestions._used;
+    // Find a fresh question at target difficulty (or nearest)
+    var replacement=null;
+    for(var off=0;off<5&&!replacement;off++){
+      for(var s=-1;s<=1&&!replacement;s+=2){
+        var dd=target+off*s;
+        if(dd<1||dd>5)continue;
+        while(buckets[dd].length){
+          var cand=buckets[dd].pop();
+          var key=cand.type+"|"+(cand.prompt||(cand.card&&cand.card.t));
+          if(used[key])continue;
+          used[key]=true;
+          replacement=cand;
+          break;
+        }
+      }
+    }
+    if(replacement){
+      // Put the old next-question's slot back into the pool (it wasn't shown yet)
+      var old=S.quizQuestions[nextIdx];
+      if(old){
+        var oldKey=old.type+"|"+(old.prompt||(old.card&&old.card.t));
+        delete used[oldKey];
+        buckets[old.difficulty].push(old);
+      }
+      S.quizQuestions[nextIdx]=replacement;
+    }
+  }
+  bumpStreak();
+  render();
 }
 
 function renderQuiz(){
@@ -1315,15 +1725,25 @@ function renderQuiz(){
   // Not started or done — show start screen
   if(!S.quizQuestions||S.quizDone){
     if(S.quizDone&&S.quizQuestions){
-      var pct=Math.round(S.quizScore/S.quizQuestions.length*100);
+      // Difficulty-weighted percentage: points earned / points possible.
+      // This preserves the leaderboard invariant: a strong student who climbs
+      // to harder questions and gets most right outscores a weaker student
+      // who only ever sees easy ones.
+      var pct=S.quizPointsPossible>0?Math.round(S.quizPointsEarned/S.quizPointsPossible*100):0;
+      var rawPct=Math.round(S.quizScore/S.quizQuestions.length*100);
       // Record score once
       if(!S.quizRecorded){recordQuizScore(S.quizName,pct);S.quizRecorded=true}
       var emoji=pct>=80?"🌟":pct>=60?"👍":pct>=40?"💪":"📚";
       h+='<div class="card" style="text-align:center;padding:30px 20px">';
       h+='<div style="font-size:48px;margin-bottom:10px">'+emoji+'</div>';
       h+='<div style="font-size:13px;color:#888;margin-bottom:4px">'+esc(S.quizName||"Anonymous")+'</div>';
-      h+='<div style="font-size:24px;font-weight:700;margin-bottom:6px">'+S.quizScore+' / '+S.quizQuestions.length+'</div>';
-      h+='<div style="font-size:14px;color:#888;margin-bottom:16px">'+pct+'% correct'+(pct>=80?" — Amazing!":pct>=60?" — Great job!":pct>=40?" — Getting there!":" — Keep studying, you got this!")+'</div>';
+      h+='<div style="font-size:24px;font-weight:700;margin-bottom:6px">'+S.quizPointsEarned+' / '+S.quizPointsPossible+' pts</div>';
+      h+='<div style="font-size:14px;color:#888;margin-bottom:6px">'+pct+'% weighted ('+S.quizScore+'/'+S.quizQuestions.length+' raw)'+'</div>';
+      // Peak difficulty
+      var peakDots="";
+      for(var d=1;d<=5;d++)peakDots+='<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+(d<=S.quizPeakDifficulty?"#f9a825":"#eee")+';margin:0 2px"></span>';
+      h+='<div style="margin-bottom:14px"><div style="font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">Peak difficulty reached</div>'+peakDots+'</div>';
+      h+='<div style="font-size:13px;color:#888;margin-bottom:16px">'+(pct>=80?"Amazing!":pct>=60?"Great job!":pct>=40?"Getting there!":"Keep studying, you got this!")+'</div>';
       h+='<button class="btn btn-primary" id="quizStart" style="margin-bottom:8px">🔄 New Quiz</button>';
       h+='</div>';
 
@@ -1333,24 +1753,25 @@ function renderQuiz(){
       h+='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:12px 0 8px">Review</div>';
       S.quizQuestions.forEach(function(q,qi){
         var gotIt=q.picked===q.correct;
+        var diffLabel='<span style="font-size:10px;color:#f9a825;font-weight:700;margin-left:6px">DIFF '+q.difficulty+'</span>';
         h+='<div class="card" style="border-left:4px solid '+(gotIt?"#4caf50":"#e53935")+';padding:14px">';
         if(q.type==="knowledge"){
-          h+='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div style="font-size:14px;font-weight:600;line-height:1.4">'+esc(q.prompt)+'</div><span style="font-size:18px;flex-shrink:0">'+(gotIt?"✅":"❌")+'</span></div>';
+          h+='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div style="font-size:14px;font-weight:600;line-height:1.4">'+esc(q.prompt)+diffLabel+'</div><span style="font-size:18px;flex-shrink:0">'+(gotIt?"✅":"❌")+'</span></div>';
           h+='<div style="font-size:13px;color:#4caf50;margin-top:6px">Answer: '+esc(q.answer)+'</div>';
           if(!gotIt&&q.picked!==null)h+='<div style="font-size:12px;color:#e53935;margin-top:2px">You picked: '+esc(q.opts[q.picked])+'</div>';
         }else{
-          h+='<div style="display:flex;justify-content:space-between;align-items:center"><div class="translit" style="font-size:15px;font-style:normal;font-weight:600">'+esc(q.card.t)+'</div><span style="font-size:18px">'+(gotIt?"✅":"❌")+'</span></div>';
+          h+='<div style="display:flex;justify-content:space-between;align-items:center"><div class="translit" style="font-size:15px;font-style:normal;font-weight:600">'+esc(q.card.t)+diffLabel+'</div><span style="font-size:18px">'+(gotIt?"✅":"❌")+'</span></div>';
           h+='<div style="font-size:13px;color:#666;margin-top:4px">'+esc(q.card.m)+'</div>';
           if(!gotIt&&q.picked!==null)h+='<div style="font-size:12px;color:#e53935;margin-top:4px">You picked: '+esc(q.opts[q.picked])+'</div>';
         }
         h+='</div>';
       });
     }else{
-      h+='<p style="font-size:13px;color:#888;margin-bottom:16px">Test your Jewish knowledge — holidays, prayers, lifecycle events, texts, history, and Hebrew vocabulary. Mixed difficulty.</p>';
+      h+='<p style="font-size:13px;color:#888;margin-bottom:16px">Adaptive quiz — questions get harder as you get them right, easier when you miss. Score is weighted by difficulty, so harder questions are worth more.</p>';
       h+='<div class="card" style="text-align:center;padding:30px 20px">';
       h+='<div style="font-size:48px;margin-bottom:12px">📝</div>';
       h+='<div style="font-size:16px;font-weight:600;margin-bottom:6px">Ready to test your knowledge?</div>';
-      h+='<div style="font-size:13px;color:#888;margin-bottom:16px">10 multiple choice questions from your study materials</div>';
+      h+='<div style="font-size:13px;color:#888;margin-bottom:16px">10 adaptive questions · difficulty 1–5</div>';
       h+='<input id="quizNameIn" type="text" placeholder="Your name (optional)" value="'+esc(S.quizName||"")+'" style="width:100%;max-width:260px;padding:10px 14px;border-radius:10px;border:2px solid #e0ddd4;background:#fff;font-size:14px;font-family:inherit;margin-bottom:12px;text-align:center;box-sizing:border-box">';
       h+='<div><button class="btn btn-primary" id="quizStart">Start Quiz</button></div>';
       h+='</div>';
@@ -1362,15 +1783,18 @@ function renderQuiz(){
   // Active quiz
   var q=S.quizQuestions[S.quizIdx];
   var total=S.quizQuestions.length;
-  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-size:13px;color:#888">Question '+(S.quizIdx+1)+' of '+total+'</div><div style="font-size:13px;font-weight:600;color:#4caf50">Score: '+S.quizScore+'</div></div>';
+  // Difficulty meter
+  var diffMeter="";
+  for(var d=1;d<=5;d++)diffMeter+='<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:'+(d<=q.difficulty?"#f9a825":"#eee")+';margin-right:2px"></span>';
+  h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div style="font-size:13px;color:#888">Q '+(S.quizIdx+1)+' of '+total+' · '+diffMeter+'</div><div style="font-size:13px;font-weight:600;color:#4caf50">'+S.quizPointsEarned+' pts</div></div>';
   h+='<div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" style="width:'+Math.round((S.quizIdx/total)*100)+'%"></div></div>';
 
   h+='<div class="card" style="padding:24px">';
   if(q.type==="knowledge"){
-    h+='<div style="font-size:11px;font-weight:600;color:#7c4dff;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📚 Knowledge</div>';
+    h+='<div style="font-size:11px;font-weight:600;color:#7c4dff;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📚 Knowledge · worth '+(q.difficulty*q.difficulty)+' pts</div>';
     h+='<div style="font-size:17px;font-weight:600;line-height:1.5;margin-bottom:18px">'+esc(q.prompt)+'</div>';
   }else{
-    h+='<div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">What does this mean?</div>';
+    h+='<div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">What does this mean? · worth '+(q.difficulty*q.difficulty)+' pts</div>';
     if(q.subtype==="translit_to_meaning"){
       h+='<div style="font-size:22px;font-weight:700;margin-bottom:6px;text-align:center">'+esc(q.card.t)+'</div>';
       h+='<div class="hebrew" style="font-size:20px;color:#aaa;text-align:center;margin-bottom:16px">'+q.card.h+'</div>';
@@ -1549,12 +1973,27 @@ function bindEvents(){
   if(fn)fn.onclick=function(){S.flashIdx++;S.flipped=false;render()};
   var fp=document.getElementById("flashPrev");
   if(fp)fp.onclick=function(){if(S.flashIdx>0)S.flashIdx--;S.flipped=false;render()};
+  // Leitner controls — knew it / missed it
+  var fk=document.getElementById("flashKnew");
+  if(fk)fk.onclick=function(){
+    var card=S.flashPool[S.flashIdx];
+    bumpFlashBox(card,true);
+    bumpStreak();
+    S.flashIdx++;S.flipped=false;render();
+  };
+  var fm=document.getElementById("flashMissed");
+  if(fm)fm.onclick=function(){
+    var card=S.flashPool[S.flashIdx];
+    bumpFlashBox(card,false);
+    bumpStreak();
+    S.flashIdx++;S.flipped=false;render();
+  };
 
-  // Tasks
-  document.querySelectorAll("[data-task]").forEach(function(b){b.onclick=function(){var id=b.dataset.task;S.tasksDone[id]=!S.tasksDone[id];saveState();render()}});
+  // Tasks (also bumps streak)
+  document.querySelectorAll("[data-task]").forEach(function(b){b.onclick=function(){var id=b.dataset.task;S.tasksDone[id]=!S.tasksDone[id];if(S.tasksDone[id])bumpStreak();saveState();render()}});
 
-  // DY course items
-  document.querySelectorAll("[data-dy]").forEach(function(b){b.onclick=function(){var key=b.dataset.dy;S.dyProgress[key]=!S.dyProgress[key];S.flashPool=null;saveState();render()}});
+  // DY course items (also bumps streak)
+  document.querySelectorAll("[data-dy]").forEach(function(b){b.onclick=function(){var key=b.dataset.dy;S.dyProgress[key]=!S.dyProgress[key];if(S.dyProgress[key])bumpStreak();S.flashPool=null;saveState();render()}});
 
   // Lesson view buttons
   document.querySelectorAll(".lessonBtn").forEach(function(b){b.onclick=function(e){e.stopPropagation();S.lessonView=b.dataset.lesson;render()}});
@@ -1613,6 +2052,16 @@ function bindEvents(){
   var gr=document.getElementById("genReport");if(gr)gr.onclick=generateReport;
 
   // Quiz
+  // BUGFIX: bind oninput to the name field so the typed name is mirrored to
+  // S.quizName immediately. Without this, any render() call between typing
+  // and clicking Start (e.g. tapping the owl, the keyboard dismissing, a tab
+  // change) rebuilds the input from S.quizName — which would be empty — and
+  // the typed name vanishes, leading to "Anonymous" on the leaderboard.
+  var qni=document.getElementById("quizNameIn");
+  if(qni)qni.oninput=function(e){
+    S.quizName=(e.target.value||"").trim();
+    try{localStorage.setItem("ivrit_quiz_name",S.quizName)}catch(err){}
+  };
   var qs=document.getElementById("quizStart");
   if(qs)qs.onclick=function(){
     var ni=document.getElementById("quizNameIn");
@@ -1621,17 +2070,33 @@ function bindEvents(){
   };
   document.querySelectorAll(".quiz-opt").forEach(function(b){b.onclick=function(){
     var qi=parseInt(b.dataset.qi);
-    var q=S.quizQuestions[S.quizIdx];
-    if(q.picked!==null)return;
-    q.picked=qi;
-    if(qi===q.correct)S.quizScore++;
-    render();
+    adaptiveAnswer(qi);
   }});
   var qn=document.getElementById("quizNext");
   if(qn)qn.onclick=function(){
     if(S.quizIdx<S.quizQuestions.length-1){S.quizIdx++;render()}
     else{S.quizDone=true;render()}
   };
+}
+
+// ═══════════════ OWL EVENTS ═══════════════
+function bindOwlEvents(){
+  var ob=document.getElementById("owlBtn");
+  if(ob)ob.onclick=function(){
+    S.owlOpen=!S.owlOpen;
+    if(S.owlOpen){
+      // Pick a fresh local message each time the panel opens
+      S.owlMsg=hootieLocalMessage();
+      S.owlAiMsg=null;
+    }
+    render();
+  };
+  var oc=document.getElementById("owlClose");
+  if(oc)oc.onclick=function(){S.owlOpen=false;S.owlAiMsg=null;render()};
+  var oa=document.getElementById("owlAi");
+  if(oa)oa.onclick=function(){hootieAIMessage()};
+  var on=document.getElementById("owlNew");
+  if(on)on.onclick=function(){S.owlMsg=hootieLocalMessage();S.owlAiMsg=null;render()};
 }
 
 // ═══════════════ INIT ═══════════════
