@@ -1156,35 +1156,148 @@ function renderFlash(){
   return h;
 }
 
+// Knowledge quiz bank — real questions about Judaism beyond vocab matching
+var KNOWLEDGE_BANK = [
+  // Holidays
+  {q:"Which holiday celebrates the Jewish New Year?",a:"Rosh Hashanah",w:["Yom Kippur","Sukkot","Shavuot"]},
+  {q:"Which is the 'Day of Atonement' and the holiest day of the Jewish year?",a:"Yom Kippur",w:["Rosh Hashanah","Passover","Tisha B'Av"]},
+  {q:"Which holiday commemorates the Exodus from Egypt?",a:"Passover (Pesach)",w:["Sukkot","Shavuot","Purim"]},
+  {q:"Which holiday celebrates the giving of the Torah at Mount Sinai?",a:"Shavuot",w:["Passover","Sukkot","Simchat Torah"]},
+  {q:"Which holiday involves building and dwelling in temporary huts?",a:"Sukkot",w:["Passover","Shavuot","Hanukkah"]},
+  {q:"Which holiday commemorates the rededication of the Second Temple and the miracle of the oil?",a:"Hanukkah",w:["Purim","Sukkot","Tisha B'Av"]},
+  {q:"Which holiday celebrates the saving of the Jews in ancient Persia, as told in the Book of Esther?",a:"Purim",w:["Hanukkah","Passover","Shavuot"]},
+  {q:"What is the name of the ritual meal eaten on the first two nights of Passover?",a:"Seder",w:["Kiddush","Havdalah","Oneg"]},
+  {q:"What forbidden food must be removed from the home before Passover?",a:"Chametz (leavened bread)",w:["Dairy products","Red meat","Shellfish"]},
+  {q:"How many candles are lit on the final night of Hanukkah (including the shamash)?",a:"9",w:["7","8","10"]},
+  {q:"How many days does Passover last in the Diaspora?",a:"8",w:["7","10","1"]},
+  {q:"What ritual marks the end of Shabbat?",a:"Havdalah",w:["Kiddush","Selichot","Tashlich"]},
+
+  // Shabbat & prayer
+  {q:"When does Shabbat begin?",a:"Friday at sunset",w:["Saturday morning","Friday midnight","Saturday at sunset"]},
+  {q:"How many candles are traditionally lit to welcome Shabbat?",a:"Two",w:["One","Seven","Nine"]},
+  {q:"What is the braided bread eaten on Shabbat called?",a:"Challah",w:["Matzah","Bagel","Pita"]},
+  {q:"What is the blessing over wine called?",a:"Kiddush",w:["HaMotzi","Shehecheyanu","Birkat HaMazon"]},
+  {q:"What is the blessing over bread called?",a:"HaMotzi",w:["Kiddush","Havdalah","Amidah"]},
+  {q:"Which prayer is recited for new or special occasions to thank God for reaching this moment?",a:"Shehecheyanu",w:["Kaddish","Kiddush","Aleinu"]},
+  {q:"What is the central declaration of Jewish faith that begins 'Hear, O Israel'?",a:"The Shema",w:["The Amidah","The Kaddish","The Aleinu"]},
+  {q:"What is the 'standing prayer' recited three times a day?",a:"The Amidah",w:["The Shema","The Kaddish","The Aleinu"]},
+  {q:"What is the mourner's prayer called?",a:"Kaddish",w:["Shema","Amidah","Kiddush"]},
+
+  // Lifecycle
+  {q:"At what age does a Jewish boy traditionally become Bar Mitzvah?",a:"13",w:["12","18","16"]},
+  {q:"At what age does a Jewish girl traditionally become Bat Mitzvah (in most Reform/Conservative practice)?",a:"12 or 13",w:["10","16","18"]},
+  {q:"What is the name of the circumcision ceremony for newborn Jewish boys, typically on the 8th day?",a:"Brit Milah",w:["Bar Mitzvah","Pidyon HaBen","Simchat Bat"]},
+  {q:"What is the canopy under which a Jewish wedding takes place?",a:"Chuppah",w:["Sukkah","Bimah","Mechitza"]},
+  {q:"What is the Jewish marriage contract called?",a:"Ketubah",w:["Get","Siddur","Megillah"]},
+  {q:"What is the traditional act at the end of a Jewish wedding ceremony?",a:"Breaking a glass",w:["Exchanging doves","Lighting a unity candle","Signing the Torah"]},
+  {q:"What is the seven-day mourning period after a death called?",a:"Shiva",w:["Shloshim","Yahrzeit","Kaddish"]},
+  {q:"What phrase, meaning 'may their memory be a blessing,' is said after mentioning someone who has died?",a:"Zichrono livracha (z\"l)",w:["Mazel tov","L'chaim","Shalom aleichem"]},
+
+  // Texts
+  {q:"What are the first five books of the Hebrew Bible collectively called?",a:"Torah",w:["Talmud","Mishnah","Tanakh"]},
+  {q:"What does 'Tanakh' stand for?",a:"Torah, Nevi'im (Prophets), Ketuvim (Writings)",w:["Torah, Mishnah, Gemara","Torah, Talmud, Midrash","Law, History, Poetry"]},
+  {q:"What is the vast compilation of rabbinic discussion, law, and commentary called?",a:"Talmud",w:["Torah","Tanakh","Midrash"]},
+  {q:"What is the first book of the Torah?",a:"Genesis (Bereshit)",w:["Exodus (Shemot)","Leviticus (Vayikra)","Deuteronomy (Devarim)"]},
+  {q:"Which book of the Torah tells the story of the Exodus from Egypt?",a:"Exodus (Shemot)",w:["Genesis (Bereshit)","Numbers (Bamidbar)","Leviticus (Vayikra)"]},
+  {q:"What is a weekly Torah portion called?",a:"Parsha (or Parashah)",w:["Mitzvah","Mishnah","Midrash"]},
+  {q:"How many commandments (mitzvot) are traditionally counted in the Torah?",a:"613",w:["10","100","1000"]},
+  {q:"What collection of rabbinic stories and interpretations explains biblical texts?",a:"Midrash",w:["Talmud","Mishnah","Siddur"]},
+
+  // Concepts & values
+  {q:"What word means 'charity' or 'righteous giving' in Hebrew?",a:"Tzedakah",w:["Chesed","Tikkun","Mitzvah"]},
+  {q:"What phrase means 'repairing the world'?",a:"Tikkun olam",w:["L'dor v'dor","Am Yisrael","Tzedek tzedek"]},
+  {q:"What does 'kosher' (kasher) literally mean?",a:"Fit or proper",w:["Blessed","Clean","Holy"]},
+  {q:"Which of these is NOT kosher?",a:"Pork",w:["Beef","Chicken","Salmon"]},
+  {q:"What is the rule about mixing in kosher law?",a:"Meat and dairy cannot be mixed",w:["Fish and vegetables cannot be mixed","Wine and bread cannot be mixed","Eggs and dairy cannot be mixed"]},
+  {q:"What is the small scroll affixed to the doorpost of a Jewish home?",a:"Mezuzah",w:["Tefillin","Tzitzit","Kippah"]},
+  {q:"What is inside a mezuzah?",a:"A parchment scroll with verses from the Shema",w:["A prayer for the home","A list of the Ten Commandments","Hebrew letters spelling God's name"]},
+  {q:"What is the prayer shawl worn during morning prayers called?",a:"Tallit",w:["Kippah","Tefillin","Gartel"]},
+  {q:"What are the fringes on the corners of a tallit called?",a:"Tzitzit",w:["Tefillin","Peyot","Shatnez"]},
+  {q:"What are the small leather boxes containing scripture, worn on the arm and head during weekday morning prayer?",a:"Tefillin",w:["Mezuzot","Tzitzit","Kippot"]},
+
+  // Synagogue & worship
+  {q:"What is the Hebrew name for a synagogue?",a:"Beit Knesset",w:["Beit Midrash","Beit Din","Beit Hamikdash"]},
+  {q:"What is the Yiddish word for synagogue?",a:"Shul",w:["Shtetl","Shtibl","Shammes"]},
+  {q:"What is the raised platform in a synagogue where the Torah is read?",a:"Bimah",w:["Ark","Aron","Ner tamid"]},
+  {q:"What is the cabinet where Torah scrolls are kept called?",a:"Aron Kodesh (Holy Ark)",w:["Bimah","Ner Tamid","Parochet"]},
+  {q:"What is the 'eternal light' that hangs above the ark?",a:"Ner Tamid",w:["Menorah","Shamash","Hanukkiah"]},
+
+  // Conversion
+  {q:"What is the Jewish ritual bath used in conversion?",a:"Mikveh",w:["Kiddush","Havdalah","Bima"]},
+  {q:"What is the court of three rabbis that oversees a conversion?",a:"Beit Din",w:["Sanhedrin","Minyan","Kehillah"]},
+  {q:"What is a convert to Judaism traditionally called in Hebrew?",a:"Ger (or Giyoret for a woman)",w:["Goy","Chaver","Talmid"]},
+  {q:"Converts traditionally take what patronymic, meaning 'child of Abraham and Sarah'?",a:"Ben/Bat Avraham v'Sarah",w:["Ben/Bat Yisrael","Ben/Bat Moshe","Ben/Bat David"]},
+  {q:"How many adult Jews are needed to form a minyan (prayer quorum)?",a:"10",w:["3","7","13"]},
+
+  // History
+  {q:"In what year was the modern State of Israel founded?",a:"1948",w:["1917","1945","1967"]},
+  {q:"What is the Hebrew term for the Holocaust?",a:"Shoah",w:["Churban","Galut","Tzara"]},
+  {q:"What ancient event is commemorated on Tisha B'Av?",a:"The destruction of the First and Second Temples in Jerusalem",w:["The Exodus from Egypt","The giving of the Torah","The binding of Isaac"]},
+  {q:"What language is most of the Talmud written in?",a:"Aramaic (with Hebrew)",w:["Hebrew only","Greek","Yiddish"]},
+
+  // Calendar
+  {q:"The Jewish calendar is based on which cycle?",a:"Lunar (with solar adjustments)",w:["Solar only","Lunar only","Seasonal only"]},
+  {q:"When does a Jewish 'day' begin?",a:"At sunset the previous evening",w:["At midnight","At sunrise","At noon"]},
+  {q:"What is added to the Jewish calendar in a leap year?",a:"An extra month (Adar II)",w:["An extra day","An extra week","Nothing — it's the same"]},
+
+  // Greetings
+  {q:"What do you say to wish someone a happy Jewish holiday?",a:"Chag Sameach",w:["Shabbat Shalom","Mazel Tov","L'chaim"]},
+  {q:"What is the standard greeting on Shabbat?",a:"Shabbat Shalom",w:["Chag Sameach","Shanah Tovah","L'shanah Tovah"]},
+  {q:"What do you say for 'Happy New Year' (Rosh Hashanah)?",a:"Shanah Tovah",w:["Chag Sameach","Mazel Tov","Gut Yontif"]},
+  {q:"What toast means 'to life'?",a:"L'chaim",w:["Mazel tov","Shalom","Baruch Hashem"]},
+
+  // Misc concepts
+  {q:"What is the Hebrew word for 'commandment' or 'good deed'?",a:"Mitzvah",w:["Tzedakah","Chesed","Kavanah"]},
+  {q:"What does 'kavanah' mean?",a:"Intention or spiritual focus in prayer",w:["Fixed prayer","Loud prayer","Silent prayer"]},
+  {q:"What does 'chesed' mean?",a:"Loving-kindness",w:["Justice","Truth","Peace"]},
+  {q:"What is the traditional Jewish greeting meaning 'peace'?",a:"Shalom",w:["Todah","Baruch Hashem","Ahava"]},
+  {q:"What does 'bashert' mean in Yiddish?",a:"Destined one / soulmate",w:["Family","Friend","Teacher"]}
+];
+
 function generateQuiz(){
-  var pool=getAllCards();
-  if(pool.length<4)return;
   var questions=[];
+  // Roughly 60% knowledge, 40% vocab for a real knowledge quiz feel
+  var knowledgeCount=Math.ceil(S.quizTotal*0.6);
+  var vocabCount=S.quizTotal-knowledgeCount;
+
+  // Knowledge questions from the bank
+  var kShuffled=shuffle(KNOWLEDGE_BANK.slice());
+  for(var i=0;i<kShuffled.length&&questions.length<knowledgeCount;i++){
+    var k=kShuffled[i];
+    var kopts=k.w.slice();
+    var kpos=Math.floor(Math.random()*4);
+    kopts.splice(kpos,0,k.a);
+    questions.push({type:"knowledge",prompt:k.q,opts:kopts,correct:kpos,answer:k.a,picked:null});
+  }
+
+  // Vocab questions from the card pool
+  var pool=getAllCards();
   var used={};
-  var shuffled=shuffle(pool.slice());
-  for(var i=0;i<shuffled.length&&questions.length<S.quizTotal;i++){
-    var card=shuffled[i];
+  var vShuffled=shuffle(pool.slice());
+  var added=0;
+  for(var j=0;j<vShuffled.length&&added<vocabCount;j++){
+    var card=vShuffled[j];
     if(used[card.t])continue;
     used[card.t]=true;
-    // Build 3 wrong answers from other cards
     var wrongs=[];
     var pool2=shuffle(pool.slice());
-    for(var j=0;j<pool2.length&&wrongs.length<3;j++){
-      if(pool2[j].t!==card.t&&!wrongs.some(function(w){return w===pool2[j].m})){
-        wrongs.push(pool2[j].m);
+    for(var m=0;m<pool2.length&&wrongs.length<3;m++){
+      if(pool2[m].t!==card.t&&pool2[m].m!==card.m&&!wrongs.some(function(w){return w===pool2[m].m})){
+        wrongs.push(pool2[m].m);
       }
     }
     if(wrongs.length<3)continue;
-    // Random position for correct answer
-    var pos=Math.floor(Math.random()*4);
-    var opts=wrongs.slice();
-    opts.splice(pos,0,card.m);
-    // Random question type
+    var vpos=Math.floor(Math.random()*4);
+    var vopts=wrongs.slice();
+    vopts.splice(vpos,0,card.m);
     var types=["translit_to_meaning","hebrew_to_meaning"];
     var qtype=types[Math.floor(Math.random()*types.length)];
-    questions.push({card:card,opts:opts,correct:pos,type:qtype,picked:null});
+    questions.push({type:"vocab",subtype:qtype,card:card,opts:vopts,correct:vpos,picked:null});
+    added++;
   }
-  return questions;
+
+  // Interleave knowledge and vocab
+  return shuffle(questions);
 }
 
 function renderQuiz(){
@@ -1212,13 +1325,19 @@ function renderQuiz(){
       S.quizQuestions.forEach(function(q,qi){
         var gotIt=q.picked===q.correct;
         h+='<div class="card" style="border-left:4px solid '+(gotIt?"#4caf50":"#e53935")+';padding:14px">';
-        h+='<div style="display:flex;justify-content:space-between;align-items:center"><div class="translit" style="font-size:15px;font-style:normal;font-weight:600">'+esc(q.card.t)+'</div><span style="font-size:18px">'+(gotIt?"✅":"❌")+'</span></div>';
-        h+='<div style="font-size:13px;color:#666;margin-top:4px">'+esc(q.card.m)+'</div>';
-        if(!gotIt)h+='<div style="font-size:12px;color:#e53935;margin-top:4px">You picked: '+esc(q.opts[q.picked])+'</div>';
+        if(q.type==="knowledge"){
+          h+='<div style="display:flex;justify-content:space-between;align-items:start;gap:8px"><div style="font-size:14px;font-weight:600;line-height:1.4">'+esc(q.prompt)+'</div><span style="font-size:18px;flex-shrink:0">'+(gotIt?"✅":"❌")+'</span></div>';
+          h+='<div style="font-size:13px;color:#4caf50;margin-top:6px">Answer: '+esc(q.answer)+'</div>';
+          if(!gotIt&&q.picked!==null)h+='<div style="font-size:12px;color:#e53935;margin-top:2px">You picked: '+esc(q.opts[q.picked])+'</div>';
+        }else{
+          h+='<div style="display:flex;justify-content:space-between;align-items:center"><div class="translit" style="font-size:15px;font-style:normal;font-weight:600">'+esc(q.card.t)+'</div><span style="font-size:18px">'+(gotIt?"✅":"❌")+'</span></div>';
+          h+='<div style="font-size:13px;color:#666;margin-top:4px">'+esc(q.card.m)+'</div>';
+          if(!gotIt&&q.picked!==null)h+='<div style="font-size:12px;color:#e53935;margin-top:4px">You picked: '+esc(q.opts[q.picked])+'</div>';
+        }
         h+='</div>';
       });
     }else{
-      h+='<p style="font-size:13px;color:#888;margin-bottom:16px">Test yourself on vocabulary, phrases, holidays, and prayers. No Hebrew letter recognition — just meanings!</p>';
+      h+='<p style="font-size:13px;color:#888;margin-bottom:16px">Test your Jewish knowledge — holidays, prayers, lifecycle events, texts, history, and Hebrew vocabulary. Mixed difficulty.</p>';
       h+='<div class="card" style="text-align:center;padding:30px 20px">';
       h+='<div style="font-size:48px;margin-bottom:12px">📝</div>';
       h+='<div style="font-size:16px;font-weight:600;margin-bottom:6px">Ready to test your knowledge?</div>';
@@ -1238,13 +1357,18 @@ function renderQuiz(){
   h+='<div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" style="width:'+Math.round((S.quizIdx/total)*100)+'%"></div></div>';
 
   h+='<div class="card" style="padding:24px">';
-  h+='<div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">What does this mean?</div>';
-  if(q.type==="translit_to_meaning"){
-    h+='<div style="font-size:22px;font-weight:700;margin-bottom:6px;text-align:center">'+esc(q.card.t)+'</div>';
-    h+='<div class="hebrew" style="font-size:20px;color:#aaa;text-align:center;margin-bottom:16px">'+q.card.h+'</div>';
+  if(q.type==="knowledge"){
+    h+='<div style="font-size:11px;font-weight:600;color:#7c4dff;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">📚 Knowledge</div>';
+    h+='<div style="font-size:17px;font-weight:600;line-height:1.5;margin-bottom:18px">'+esc(q.prompt)+'</div>';
   }else{
-    h+='<div class="hebrew" style="font-size:24px;text-align:center;margin-bottom:6px">'+q.card.h+'</div>';
-    h+='<div style="font-size:16px;color:#888;font-style:italic;text-align:center;margin-bottom:16px">'+esc(q.card.t)+'</div>';
+    h+='<div style="font-size:11px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px">What does this mean?</div>';
+    if(q.subtype==="translit_to_meaning"){
+      h+='<div style="font-size:22px;font-weight:700;margin-bottom:6px;text-align:center">'+esc(q.card.t)+'</div>';
+      h+='<div class="hebrew" style="font-size:20px;color:#aaa;text-align:center;margin-bottom:16px">'+q.card.h+'</div>';
+    }else{
+      h+='<div class="hebrew" style="font-size:24px;text-align:center;margin-bottom:6px">'+q.card.h+'</div>';
+      h+='<div style="font-size:16px;color:#888;font-style:italic;text-align:center;margin-bottom:16px">'+esc(q.card.t)+'</div>';
+    }
   }
 
   q.opts.forEach(function(opt,oi){
@@ -1321,15 +1445,12 @@ function getAllCards(){
   EVERYDAY.forEach(function(p){cards.push(p)});
   VOCAB.forEach(function(v){cards.push(v)});
   HOLIDAYS.forEach(function(ho){ho.phrases.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:ho.name})})});
-  // Add prayers to flashcard pool
+  LIFECYCLE.forEach(function(lc){lc.phrases.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:lc.name})})});
   PRAYERS.shabbat.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:"Shabbat: "+p.name})});
   PRAYERS.conversion.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:"Conversion: "+p.name})});
-  // Add content from completed course modules
+  // All course content — ungated so quiz covers everything
   Object.keys(COURSE_CONTENT).forEach(function(moduleName){
-    var key="dy_"+moduleName.replace(/\W/g,"_");
-    if(S.dyProgress[key]){
-      COURSE_CONTENT[moduleName].forEach(function(item){cards.push(item)});
-    }
+    COURSE_CONTENT[moduleName].forEach(function(item){cards.push(item)});
   });
   return cards;
 }
