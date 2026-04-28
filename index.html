@@ -1050,6 +1050,7 @@ function render(){
   var tabs=[
     {id:"home",icon:"🏠",label:"Home"},
     {id:"learn",icon:"📚",label:"Learn"},
+    {id:"darshan",icon:"🎓",label:"Darshan"},
     {id:"flash",icon:"🃏",label:"Cards"},
     {id:"quiz",icon:"❓",label:"Quiz"},
     {id:"media",icon:"📖",label:"Media"},
@@ -1069,6 +1070,7 @@ function render(){
 
   if(S.page==="home") h=renderHome();
   else if(S.page==="learn") h=S.subpage?renderSub():renderLearn();
+  else if(S.page==="darshan"){S.subpage="course";h=renderSub();}
   else if(S.page==="flash") h=renderFlash();
   else if(S.page==="quiz") h=renderQuiz();
   else if(S.page==="media") h=renderMedia();
@@ -1238,7 +1240,7 @@ function renderLearn(){
 
 function renderSub(){
   var sp=S.subpage;
-  var h='<button class="btn-sm btn-outline" data-back="learn" style="margin-bottom:14px">← Back</button>';
+  var h=S.page==="darshan"?'':'<button class="btn-sm btn-outline" data-back="learn" style="margin-bottom:14px">← Back</button>';
 
   if(sp==="holidays"){
     h+='<h2 style="margin-bottom:14px">Holiday Sayings</h2>';
@@ -2042,7 +2044,7 @@ async function sendChat(){
 // ═══════════════ EVENTS ═══════════════
 function bindEvents(){
   // Nav
-  document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){S.page=b.dataset.pg;S.subpage=null;S.flipped=false;if(S.page==="quiz")loadLeaderboard();render()}});
+  document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){S.page=b.dataset.pg;S.subpage=(S.page==="darshan"?"course":null);S.flipped=false;S.lessonView=null;if(S.page==="quiz")loadLeaderboard();render()}});
 
   // Home quick links
   document.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){S.page=b.dataset.go;if(S.page==="quiz")loadLeaderboard();render()}});
