@@ -147,19 +147,129 @@ var HOLIDAYS = [
   ]}
 ];
 
-var EVERYDAY = [
-  {h:"שָׁלוֹם",t:"Shalom",m:"Hello / Goodbye / Peace",c:"The most universal Hebrew greeting — literally means 'peace.'"},
-  {h:"תּוֹדָה",t:"Todah",m:"Thank you",c:"Todah rabah = 'thank you very much.'"},
-  {h:"בְּבַקָּשָׁה",t:"B'vakashah",m:"Please / You're welcome",c:"Used both as 'please' and as a response to todah."},
-  {h:"בָּרוּךְ הַשֵּׁם",t:"Baruch HaShem",m:"Blessed is God / Thank God",c:"Said when something good happens. 'How are you?' — 'Baruch HaShem!'"},
-  {h:"בְּעֶזְרַת הַשֵּׁם",t:"B'ezrat HaShem",m:"With God's help / God willing",c:"Said when talking about future plans."},
-  {h:"מַזָּל טוֹב",t:"Mazel Tov",m:"Congratulations! / Good luck!",c:"Said at weddings, births, b'nai mitzvah, and all happy occasions."},
-  {h:"בִּשְׁבִיל חַיִּים",t:"L'chaim",m:"To life!",c:"The classic Jewish toast when drinking."},
-  {h:"יִישַׁר כֹּחַ",t:"Yasher Koach",m:"Well done / May your strength be firm",c:"Said to someone who just did something well, especially reading Torah."},
-  {h:"הַמָּקוֹם יְנַחֵם אֶתְכֶם",t:"HaMakom Y'nachem Etchem",m:"May God comfort you",c:"Said to mourners — part of the formal condolence."},
-  {h:"תִּקּוּן עוֹלָם",t:"Tikkun Olam",m:"Repairing the world",c:"A central Jewish concept — the obligation to make the world better."},
-  {h:"צְדָקָה",t:"Tzedakah",m:"Charity / Righteousness",c:"Not just 'giving' — it's an obligation of justice. From the root 'tzedek' (justice)."}
+// Everyday phrases — organized into groups for the compact list view.
+// Each group has a label and entries. Each entry: h (Hebrew), t (translit),
+// m (meaning), c (context/optional).
+var EVERYDAY_GROUPS = [
+  {label:"Greetings",icon:"👋",items:[
+    {h:"שָׁלוֹם",t:"Shalom",m:"Hello / Goodbye / Peace",c:"The most universal Hebrew greeting — literally 'peace.'"},
+    {h:"בּוֹקֶר טוֹב",t:"Boker Tov",m:"Good morning",c:"Reply: 'Boker or' (morning of light)."},
+    {h:"עֶרֶב טוֹב",t:"Erev Tov",m:"Good evening"},
+    {h:"לַיְלָה טוֹב",t:"Layla Tov",m:"Good night"},
+    {h:"שַׁבָּת שָׁלוֹם",t:"Shabbat Shalom",m:"Peaceful Sabbath",c:"Friday evening through Saturday."},
+    {h:"שָׁבוּעַ טוֹב",t:"Shavua Tov",m:"A good week",c:"Said Saturday night when Shabbat ends."},
+    {h:"חַג שָׂמֵחַ",t:"Chag Sameach",m:"Happy holiday",c:"Universal greeting for any Jewish holiday."},
+    {h:"לְהִתְרָאוֹת",t:"L'hitra'ot",m:"See you / Goodbye"},
+    {h:"בַּיי",t:"Bai",m:"Bye",c:"Modern Israeli — borrowed from English."}
+  ]},
+  {label:"Courtesy",icon:"🙏",items:[
+    {h:"תּוֹדָה",t:"Todah",m:"Thank you"},
+    {h:"תּוֹדָה רַבָּה",t:"Todah Rabah",m:"Thanks very much"},
+    {h:"בְּבַקָּשָׁה",t:"B'vakashah",m:"Please / You're welcome",c:"Used both as 'please' and as a response to todah."},
+    {h:"סְלִיחָה",t:"Slicha",m:"Excuse me / Sorry",c:"Polite way to get attention or apologize."},
+    {h:"אֵין בְּעָיָה",t:"Ein Be'ayah",m:"No problem"},
+    {h:"בְּכֵיף",t:"B'kef",m:"With pleasure / Sure",c:"Casual Israeli."},
+    {h:"בְּתֵאָבוֹן",t:"B'tei'avon",m:"Bon appétit",c:"Said before eating, like the French expression."}
+  ]},
+  {label:"Introductions",icon:"🤝",items:[
+    {h:"מָה שִׁמְךָ?",t:"Mah Shimcha?",m:"What's your name? (to a man)"},
+    {h:"מָה שְׁמֵךְ?",t:"Mah Shmech?",m:"What's your name? (to a woman)"},
+    {h:"שְׁמִי...",t:"Shmi...",m:"My name is..."},
+    {h:"אֲנִי ג׳נִיפֶר",t:"Ani Jennifer",m:"I'm Jennifer",c:"'Ani' = I am."},
+    {h:"נָעִים מְאֹד",t:"Naim Me'od",m:"Very nice to meet you"},
+    {h:"מֵאֵיפֹה אַתְּ?",t:"Me'eifo At?",m:"Where are you from? (to a woman)",c:"'Me'eifo atah' to a man."}
+  ]},
+  {label:"How are you",icon:"💬",items:[
+    {h:"מָה שְׁלוֹמְךָ?",t:"Mah Shlomcha?",m:"How are you? (to a man)",c:"Lit. 'how is your peace.'"},
+    {h:"מָה שְׁלוֹמֵךְ?",t:"Mah Shlomech?",m:"How are you? (to a woman)"},
+    {h:"מָה נִשְׁמָע?",t:"Mah Nishma?",m:"What's up? / What's heard?",c:"Casual everyday greeting in Israel."},
+    {h:"בְּסֵדֶר",t:"B'seder",m:"Fine / OK",c:"Lit. 'in order.' The default 'I'm OK' answer."},
+    {h:"הַכֹּל בְּסֵדֶר",t:"Hakol B'seder",m:"Everything's fine"},
+    {h:"מְצֻיָּן",t:"Metzuyan",m:"Excellent",c:"Stronger than 'b'seder.'"},
+    {h:"בָּרוּךְ הַשֵּׁם",t:"Baruch HaShem",m:"Thank God",c:"Common religious answer to 'how are you.'"}
+  ]},
+  {label:"Yes / No / Maybe",icon:"✅",items:[
+    {h:"כֵּן",t:"Ken",m:"Yes"},
+    {h:"לֹא",t:"Lo",m:"No"},
+    {h:"אוּלַי",t:"Ulai",m:"Maybe / Perhaps"},
+    {h:"בְּטוּחַ",t:"Batuach",m:"Sure / Definitely"},
+    {h:"כַּמּוּבָן",t:"Kamuvan",m:"Of course",c:"Lit. 'as understood.'"},
+    {h:"לֹא בָּטוּחַ",t:"Lo Batuach",m:"Not sure"}
+  ]},
+  {label:"Reactions & feelings",icon:"😄",items:[
+    {h:"יוֹפִי",t:"Yofi",m:"Beautiful / Great",c:"Common everyday positive reaction."},
+    {h:"סַבַּבָּה",t:"Sababa",m:"Cool / Awesome",c:"Israeli slang from Arabic — extremely common."},
+    {h:"וָאוּ",t:"Wow",m:"Wow",c:"Same as English."},
+    {h:"אוֹי",t:"Oy",m:"Oh / Alas",c:"The classic Yiddish lament. 'Oy vey' = 'oh, woe.'"},
+    {h:"אוֹי וֵיי",t:"Oy Vey",m:"Oh, woe / Oh dear",c:"Yiddish — for when something goes wrong."},
+    {h:"מַזָּל טוֹב",t:"Mazel Tov",m:"Congratulations!",c:"Weddings, births, b'nai mitzvah, every happy occasion."},
+    {h:"לְחַיִּים",t:"L'chaim",m:"To life!",c:"The classic Jewish toast when drinking."},
+    {h:"יִישַׁר כֹּחַ",t:"Yasher Koach",m:"Well done / May your strength be firm",c:"Said after someone reads Torah, gives a speech, or completes something well."},
+    {h:"כְּוֵל",t:"Kvell",m:"Beam with pride",c:"Yiddish — 'I'm kvelling over my daughter.'"},
+    {h:"בְּלִי עַיִן הָרָע",t:"Bli Ayin Hara",m:"Without the evil eye",c:"Said after good news to ward off bad luck (also: 'Kein ayin hara' / 'kenahora')."}
+  ]},
+  {label:"Common questions",icon:"❓",items:[
+    {h:"אֵיפֹה?",t:"Eifo?",m:"Where?"},
+    {h:"מָתַי?",t:"Matai?",m:"When?"},
+    {h:"לָמָּה?",t:"Lama?",m:"Why?"},
+    {h:"מָה?",t:"Mah?",m:"What?"},
+    {h:"מִי?",t:"Mi?",m:"Who?"},
+    {h:"כַּמָּה?",t:"Kamah?",m:"How much / How many?"},
+    {h:"אֵיךְ?",t:"Eich?",m:"How?"},
+    {h:"אַתָּה מְדַבֵּר אַנְגְּלִית?",t:"Atah Medaber Anglit?",m:"Do you speak English? (to a man)"},
+    {h:"אֲנִי לֹא מֵבִינָה",t:"Ani Lo Mevinah",m:"I don't understand (woman speaking)",c:"'Ani lo mevin' for a man."}
+  ]},
+  {label:"Time & calendar",icon:"⏰",items:[
+    {h:"יוֹם",t:"Yom",m:"Day"},
+    {h:"שָׁבוּעַ",t:"Shavua",m:"Week"},
+    {h:"חֹדֶשׁ",t:"Chodesh",m:"Month"},
+    {h:"שָׁנָה",t:"Shanah",m:"Year"},
+    {h:"הַיּוֹם",t:"Hayom",m:"Today"},
+    {h:"מָחָר",t:"Machar",m:"Tomorrow"},
+    {h:"אֶתְמוֹל",t:"Etmol",m:"Yesterday"},
+    {h:"עַכְשָׁו",t:"Achshav",m:"Now"},
+    {h:"אַחַר־כָּךְ",t:"Achar-Kach",m:"Later / After that"}
+  ]},
+  {label:"Numbers 1-10",icon:"🔢",items:[
+    {h:"אֶחָד",t:"Echad",m:"One",c:"Used with masculine nouns. 'Achat' for feminine."},
+    {h:"שְׁתַּיִם",t:"Shtayim",m:"Two",c:"'Shnayim' for masculine."},
+    {h:"שָׁלוֹשׁ",t:"Shalosh",m:"Three"},
+    {h:"אַרְבַּע",t:"Arba",m:"Four"},
+    {h:"חָמֵשׁ",t:"Chamesh",m:"Five"},
+    {h:"שֵׁשׁ",t:"Shesh",m:"Six"},
+    {h:"שֶׁבַע",t:"Sheva",m:"Seven"},
+    {h:"שְׁמוֹנֶה",t:"Shmoneh",m:"Eight"},
+    {h:"תֵּשַׁע",t:"Tesha",m:"Nine"},
+    {h:"עֶשֶׂר",t:"Eser",m:"Ten"}
+  ]},
+  {label:"Faith & prayer talk",icon:"✡️",items:[
+    {h:"בְּעֶזְרַת הַשֵּׁם",t:"B'ezrat HaShem",m:"With God's help / God willing",c:"When talking about future plans."},
+    {h:"הַלְּוַאי",t:"Halevai",m:"If only / I wish",c:"Used like Spanish 'ojalá.'"},
+    {h:"אָמֵן",t:"Amen",m:"Amen / So be it",c:"Said after every blessing."},
+    {h:"הַשֵּׁם",t:"HaShem",m:"The Name",c:"Reverent way to refer to God without saying the name."},
+    {h:"תִּקּוּן עוֹלָם",t:"Tikkun Olam",m:"Repairing the world",c:"Central Jewish concept — the obligation to make the world better."},
+    {h:"צְדָקָה",t:"Tzedakah",m:"Charity / Righteousness",c:"Not optional charity — an obligation of justice."},
+    {h:"חֶסֶד",t:"Chesed",m:"Loving-kindness",c:"One of the highest Jewish values."},
+    {h:"זִכְרוֹנוֹ לִבְרָכָה",t:"Zichrono Livracha",m:"May his memory be a blessing (z\"l)",c:"'Zichronah livracha' for a woman. Said after mentioning the dead."},
+    {h:"הַמָּקוֹם יְנַחֵם אֶתְכֶם",t:"HaMakom Y'nachem Etchem",m:"May God comfort you",c:"Said to mourners — part of the formal condolence."},
+    {h:"בָּרוּךְ דַּיַּן הָאֱמֶת",t:"Baruch Dayan HaEmet",m:"Blessed is the true Judge",c:"Said upon hearing of a death."}
+  ]},
+  {label:"Israeli slang & Yiddish",icon:"🗣️",items:[
+    {h:"אֵיזֶה כֵּיף",t:"Eizeh Kef",m:"What fun / How nice",c:"Common everyday expression of delight."},
+    {h:"דַּוְקָא",t:"Davka",m:"Specifically / On the contrary",c:"Untranslatable Israeli word — adds 'pointedly' or 'just because.'"},
+    {h:"בַּלָגָן",t:"Balagan",m:"Mess / Chaos",c:"From Russian. 'What a balagan!'"},
+    {h:"חָבֵר",t:"Chaver",m:"Friend / Boyfriend",c:"'Chaverah' — friend (f) or girlfriend."},
+    {h:"מִשְׁפָּחָה",t:"Mishpacha",m:"Family",c:"Both immediate and extended."},
+    {h:"חֻצְפָּה",t:"Chutzpah",m:"Audacity / Nerve"},
+    {h:"שְׁלֶפְּ",t:"Schlep",m:"To drag (yourself or stuff)",c:"Yiddish. 'Don't make me schlep across town.'"},
+    {h:"קְוֶעטְשׁ",t:"Kvetch",m:"To complain",c:"Yiddish. 'Stop kvetching.'"},
+    {h:"נוֹשׁ",t:"Nosh",m:"Snack / To snack"},
+    {h:"בָּשֵׁרְט",t:"Bashert",m:"Destined / Soulmate",c:"Yiddish — 'meant to be.'"}
+  ]}
 ];
+
+// Backwards-compatibility — flatten groups so existing card-pool code still works.
+var EVERYDAY = EVERYDAY_GROUPS.reduce(function(acc,g){return acc.concat(g.items)},[]);
 
 var ALEFBET = [
   {h:"א",t:"Alef",m:"Silent letter — takes the sound of its vowel",v:"(silent)"},
@@ -284,6 +394,54 @@ var MEDIA = {
   ]
 };
 
+// Audio-listener previews for priority books — written for someone who'll
+// listen on Audible rather than read. Each has: an overview, main teaching
+// points, and listening tips (chapter structure / what to lean in on).
+var BOOK_PREVIEWS = {
+  "Jewish Literacy":{
+    a:"Joseph Telushkin",
+    audible_hours:"~37 hrs (full version) or ~14 hrs (abridged)",
+    why:"This is THE single-volume reference for what every literate Jew knows. rB highlighted it as your starting point because it converts you from 'curious outsider' to 'someone who can keep up in a Jewish room' faster than any other book.",
+    overview:"A 700-page encyclopedia organized into ~340 short chapters (3-5 min each on audio), each one freestanding. You're not meant to read it linearly — you're meant to graze. It covers: the Bible (the stories you'll hear referenced constantly), Jewish history (3,000 years from Abraham to the Six-Day War), Jewish texts (Talmud, Mishnah, etc.), holidays and lifecycle, ethics and law, antisemitism and modern Israel, and key personalities.",
+    takeaways:[
+      "The Hebrew Bible isn't one book — it's a library written across 1,000 years, and Telushkin gives you the cheat sheet to all 24 books.",
+      "Every Jewish holiday has a dual meaning: agricultural/seasonal AND historical/spiritual. You'll start hearing both layers in the same prayers.",
+      "Antisemitism isn't one thing — religious, racial, and political antisemitism each have distinct histories and need distinct responses. This shapes a lot of modern Jewish anxiety.",
+      "Jewish ethics (tzedakah, tikkun olam, b'tzelem Elohim) aren't optional add-ons — they ARE the religion's core. The rituals exist to train you in the ethics.",
+      "Israel and Diaspora are not opposed. Modern Jewish identity holds both; understanding this is non-negotiable for serious conversion."
+    ],
+    listening_tips:"Don't try to listen end-to-end. Use the chapter list like a table of topics: when something comes up at services or with rB you didn't catch, look it up and listen to that 5-minute chapter. The audiobook narrator is steady and clear at 1.0–1.2x. Bookmark generously — you WILL come back to chapters."
+  },
+  "Here All Along":{
+    a:"Sarah Hurwitz",
+    audible_hours:"~13 hrs",
+    why:"⭐ Currently reading. Hurwitz was Michelle Obama's head speechwriter and a secular Jew her whole life — she 'rediscovered' Judaism as an adult and writes from exactly your starting point. Most converts cite this as the book that finally made Judaism click emotionally.",
+    overview:"Memoir + survey, in roughly equal measure. Hurwitz braids her own re-entry into Judaism with chapters that explain what each thing actually means: God, prayer, Shabbat, holidays, life-cycle events, ethics, and Israel. Unlike Telushkin (encyclopedic, neutral), Hurwitz writes with a voice — you'll feel like you're having a long warm dinner conversation with a smart friend who's a few years ahead of you.",
+    takeaways:[
+      "'Belief in God' is not the prerequisite for Jewish practice that English-speakers assume. Many serious Jews — including rabbis — hold open or evolving theological positions. You don't have to settle this before converting.",
+      "Shabbat is the single most life-changing Jewish practice. It's countercultural in the smartphone era and Hurwitz makes the case better than anyone.",
+      "Prayer is not asking God for stuff. It's a structured practice for orienting your attention, gratitude, and ethical demands on yourself — closer to meditation than petition.",
+      "The Jewish ethical tradition is radical: commands you to feed strangers, free slaves, leave field corners for the poor, and rest the land every 7 years. Read the prophets — they're fire.",
+      "Conversion is not 'becoming Jewish from zero.' It's stepping into a story that's been waiting for you. Hurwitz, born Jewish, also describes herself as having 'converted' — to a serious version of the tradition. That move is yours too."
+    ],
+    listening_tips:"This is the audiobook to LEAN INTO — listen on walks, commutes, while cooking. Hurwitz reads it herself and her delivery is conversational and warm. Don't multitask through the chapters on Shabbat (Ch. 3) and prayer (Ch. 5) — those are the ones that shift converts. Re-listen to the intro after you finish; it'll hit differently."
+  },
+  "Choosing A Jewish Life":{
+    a:"Anita Diamant",
+    audible_hours:"~9 hrs",
+    why:"The single best practical guide to the conversion process itself. Diamant wrote 'The Red Tent' and is the most readable popular Jewish writer of the last 30 years. She writes specifically for adult converts in liberal (Reform/Conservative/Reconstructionist) traditions.",
+    overview:"Half handbook, half pep talk. Walks you through everything in your actual journey: choosing a denomination, finding a rabbi, the Beit Din, the mikveh, picking a Hebrew name, telling your family, navigating interfaith relationships, joining a community, raising Jewish kids, and surviving the awkward early holidays. Includes voices from many real converts.",
+    takeaways:[
+      "There is no single 'right' conversion. Reform, Conservative, and Reconstructionist all produce real Jews. Don't let comparison or anxiety distort your choice — pick the community that calls you.",
+      "The Beit Din is not a test. Diamant deflates the fear: rabbis are looking for sincerity and engagement, not encyclopedic recall. Show up, be honest, share your why.",
+      "The mikveh is the most spiritually intense moment many converts ever experience. Plan it; don't rush it. Many choose to mark it with a small celebration.",
+      "Telling your family will go better than you fear AND worse than you hope. There are concrete scripts and tactics for the harder conversations — Diamant gives them.",
+      "The first year as a Jew is harder than the conversion itself. Holidays, interfaith family events, weddings, deaths, kids' schools — every cycle of the year asks you to keep choosing. This is normal."
+    ],
+    listening_tips:"Already completed in January — but worth re-listening to specific chapters as moments come up. Re-listen to the Beit Din and mikveh chapters in the weeks leading up to YOUR Beit Din and mikveh. Also keep the 'navigating family' chapter handy if/when conflicts surface around holidays."
+  }
+};
+
 // Course content — when a module is checked, related phrases/concepts get added to flashcards
 var COURSE_CONTENT = {
   "The Jewish Calendar":[
@@ -362,6 +520,211 @@ var COURSE_CONTENT = {
   "Introduction to Middot":[
     {h:"מִדּוֹת",t:"Middot",m:"Character traits / Ethical qualities — the focus of Mussar practice",c:"Working on middot (like patience, humility, gratitude) is a lifelong Jewish practice."},
     {h:"עֲנָוָה",t:"Anavah",m:"Humility — one of the key middot",c:"Not thinking less of yourself, but thinking of yourself less."}
+  ],
+
+  // ═══ Intro to Darshan Yeshiva ═══
+  "Introduction to our program":[
+    {h:"דַּרְשָׁן",t:"Darshan",m:"One who explains/interprets — a teacher of Torah",c:"The Darshan Yeshiva trains laypeople and converts to interpret Jewish text and life."},
+    {h:"יְשִׁיבָה",t:"Yeshivah",m:"Sitting / a place of Jewish study",c:"Traditionally a yeshiva is where Talmud is studied. Darshan Yeshiva extends this to converts."}
+  ],
+  "Conversion to Judaism: A History":[
+    {h:"גֵּר צֶדֶק",t:"Ger Tzedek",m:"Righteous convert — the formal Hebrew term for a convert to Judaism",c:"Distinguished from ger toshav (resident alien). You will be a ger tzedek."},
+    {h:"בַּת אַבְרָהָם וְשָׂרָה",t:"Bat Avraham v'Sarah",m:"Daughter of Abraham and Sarah — the patronymic given to female converts",c:"Male converts are 'ben Avraham v'Sarah.' Linking every convert spiritually to the first Jews."},
+    {h:"רוּת",t:"Rut (Ruth)",m:"The Moabite who became the archetypal convert",c:"'Your people shall be my people, and your God my God' (Ruth 1:16) — the classic conversion declaration."}
+  ],
+  "Rabbi Patrick Podcast: Are You Legitimately Jewish?":[
+    {h:"הֲלָכָה",t:"Halakhah",m:"Jewish law — the path/way of walking",c:"Different denominations interpret halakhah differently — that's why conversions vary in recognition."},
+    {h:"מַטְרִילִינֵאָלִי",t:"Matrilineal",m:"Through the mother — traditional rule for Jewish descent",c:"Reform Judaism (1983) added patrilineal descent if raised Jewishly. Other movements still require matrilineal."}
+  ],
+  "Introduction to Jewish Identity":[
+    {h:"עַם יִשְׂרָאֵל",t:"Am Yisrael",m:"The people of Israel — Jewish peoplehood",c:"Jewishness is not just a religion — it's belonging to Am Yisrael, a people with a shared story."},
+    {h:"כְּלַל יִשְׂרָאֵל",t:"K'lal Yisrael",m:"The whole community of Israel — all Jews everywhere",c:"A reminder that what binds Jews is bigger than any denomination or country."},
+    {h:"אַשְׁכְּנַזִּים",t:"Ashkenazim",m:"Jews of medieval European (German/Polish) origin",c:"Together with Sephardim and Mizrahim, the major Jewish ethnic streams."}
+  ],
+  "Rabbi Patrick Podcast: Circumcision, Bet Din and Mikvah":[
+    {h:"הֲטָפַת דַּם בְּרִית",t:"Hatafat Dam Brit",m:"A symbolic drop of covenantal blood — for already-circumcised male converts",c:"Brief, symbolic ritual. Reform Judaism may treat this as optional."},
+    {h:"בֵּית דִּין",t:"Beit Din",m:"Court of Jewish law — three rabbis who oversee your conversion",c:"Asks: are you ready to share the fate of the Jewish people, come what may?"},
+    {h:"טְבִילָה",t:"T'vilah",m:"Immersion — the ritual act of entering the mikveh",c:"Three full immersions complete the conversion. You emerge a Jew."}
+  ],
+
+  // ═══ Holidays + extras ═══
+  "Rabbi Patrick Podcast Break: What You Need To Know To Be Jewish":[
+    {h:"שְׁלֹשׁ עֶשְׂרֵה מִדּוֹת",t:"Shlosh Esrei Middot",m:"The thirteen attributes of God (Exodus 34) — recited on fast days and High Holidays",c:"Core liturgical text expressing God's mercy."},
+    {h:"פִּקּוּחַ נֶפֶשׁ",t:"Pikuach Nefesh",m:"Saving a life — overrides almost every other commandment",c:"You may break Shabbat or Yom Kippur to save a life. Life is the supreme Jewish value."}
+  ],
+  "Israeli National Holidays":[
+    {h:"יוֹם הָעַצְמָאוּת",t:"Yom Ha'atzmaut",m:"Israeli Independence Day — 5 Iyar",c:"Marks Israel's 1948 declaration. Celebrated with picnics, music, and fireworks."},
+    {h:"יוֹם הַזִּכָּרוֹן",t:"Yom HaZikaron",m:"Israeli Memorial Day — 4 Iyar, the day before Independence Day",c:"Two minutes of siren-stopped silence honor fallen soldiers. The transition into joy is intentional."},
+    {h:"יוֹם יְרוּשָׁלַיִם",t:"Yom Yerushalayim",m:"Jerusalem Day — 28 Iyar, marking reunification in 1967",c:"Politically charged for some — celebrate in age-appropriate ways."},
+    {h:"יוֹם הַשּׁוֹאָה",t:"Yom HaShoah",m:"Holocaust Remembrance Day — 27 Nisan",c:"Six candles for six million. Sirens stop traffic in Israel."}
+  ],
+  "Rabbi Patrick Podcast Break: Circumcision, Bet Din and Mikvah":[
+    {h:"מוֹהֵל",t:"Mohel",m:"Ritual circumciser — performs brit milah and hatafat dam brit",c:"Modern mohels are often also Jewish doctors."},
+    {h:"כַּוָּנָה",t:"Kavanah",m:"Inner intention — what you bring to the ritual matters as much as the act",c:"At your mikveh, your kavanah transforms water into transformation."}
+  ],
+
+  // ═══ Jewish Texts (rest) ═══
+  "By the Rivers of Babylon":[
+    {h:"בָּבֶל",t:"Bavel",m:"Babylon — site of the first major exile (586 BCE)",c:"'By the rivers of Babylon, there we sat down and wept' — Psalm 137."},
+    {h:"גָּלוּת",t:"Galut",m:"Exile / Diaspora — the condition of Jews living outside the Land of Israel",c:"Galut is a recurring theme: physical exile and spiritual longing for return."}
+  ],
+  "The Book and the Sword":[
+    {h:"בֵּית הַמִּקְדָּשׁ",t:"Beit HaMikdash",m:"The Holy Temple in Jerusalem — destroyed twice (586 BCE, 70 CE)",c:"Tisha B'Av mourns both destructions."},
+    {h:"חֻרְבָּן",t:"Churban",m:"Destruction — especially of the Temple",c:"After the second churban, Judaism transformed from Temple-centered to text-centered."}
+  ],
+  "The End of Days":[
+    {h:"מָשִׁיחַ",t:"Mashiach",m:"Anointed one / Messiah — a future figure who ushers in redemption",c:"Jewish messianism is very different from Christian: the Mashiach is human, redemption is collective and worldly."},
+    {h:"עוֹלָם הַבָּא",t:"Olam Haba",m:"The world to come — the messianic future or afterlife",c:"Judaism focuses on this world, but olam haba is part of traditional belief."},
+    {h:"גְּאֻלָּה",t:"Geulah",m:"Redemption — the final repair of the world",c:"Tikkun olam is the work; geulah is the goal."}
+  ],
+  "The Gifts of the Jews":[
+    {h:"מוֹנוֹתֵאִיזְם",t:"Monoteizm",m:"Monotheism — the belief in one God, Judaism's foundational gift to the world",c:"Before the Israelites, the ancient world was overwhelmingly polytheistic."},
+    {h:"שַׁבָּת",t:"Shabbat",m:"The Sabbath — Judaism's invention of the day of rest, given to the world",c:"The 7-day week with a day off is a Jewish invention now used globally."},
+    {h:"צֶדֶק",t:"Tzedek",m:"Justice — the prophetic insistence that ethics is the heart of religion",c:"'Tzedek tzedek tirdof' — 'Justice, justice you shall pursue' (Deuteronomy 16:20)."}
+  ],
+  "Rabbi Patrick Podcast Break: You're Becoming Jewish! But What About Your Family?":[
+    {h:"מִשְׁפָּחָה",t:"Mishpacha",m:"Family — both born and chosen",c:"Your conversion is a transition for your family too. Reform tradition welcomes interfaith family."},
+    {h:"שָׁלוֹם בַּיִת",t:"Shalom Bayit",m:"Peace in the home — a core Jewish value",c:"Conversion can disrupt family peace. Honoring parents while becoming Jewish is its own art."}
+  ],
+  "Tanakh & Neviim":[
+    {h:"תַּנַ\"ךְ",t:"Tanakh",m:"Acronym for Torah + Nevi'im (Prophets) + Ketuvim (Writings) — the Hebrew Bible",c:"What Christians call the 'Old Testament' is the Tanakh — but ordered differently."},
+    {h:"נְבִיאִים",t:"Nevi'im",m:"Prophets — the second division of the Tanakh",c:"Includes Joshua, Judges, Samuel, Kings, Isaiah, Jeremiah, Ezekiel, and the twelve minor prophets."},
+    {h:"יְשַׁעְיָהוּ",t:"Yeshayahu (Isaiah)",m:"Major prophet — voice of social justice and messianic hope",c:"'Beat swords into plowshares' is from Isaiah 2:4."}
+  ],
+  "Ketuvim: Writings":[
+    {h:"כְּתוּבִים",t:"Ketuvim",m:"Writings — the third and final division of the Tanakh",c:"Includes Psalms, Proverbs, Job, Song of Songs, Ruth, Lamentations, Ecclesiastes, Esther, Daniel, Ezra-Nehemiah, Chronicles."},
+    {h:"תְּהִלִּים",t:"Tehillim",m:"Psalms — 150 poems used in Jewish liturgy and personal prayer",c:"Many Jews say Tehillim in times of crisis or for healing."},
+    {h:"אֵיכָה",t:"Eichah",m:"Lamentations — read by candlelight on Tisha B'Av, mourning Jerusalem's destruction",c:"The book opens 'How' (Eichah) — the cry of grief that names the book."}
+  ],
+
+  // ═══ Jewish Peoplehood ═══
+  "The Medieval Period + Among Christians and Muslims":[
+    {h:"עֲשָׂרָה דִּבְּרוֹת",t:"Sephardim",m:"Sephardim",c:"(Note: Sephardim = Jews of Iberian/Mediterranean origin. Lived under Christian and Muslim rulers in medieval Spain/Portugal.)"},
+    {h:"רַמְבַּ\"ם",t:"Rambam",m:"Acronym for Rabbi Moshe ben Maimon (Maimonides) — the great medieval philosopher",c:"Wrote the Mishneh Torah and the Guide for the Perplexed. Lived under Islamic rule in Spain and Egypt."},
+    {h:"רַשִׁ\"י",t:"Rashi",m:"Rabbi Shlomo Yitzchaki — the most influential medieval Torah commentator",c:"Lived in 11th century France. Every traditional Hebrew Bible includes his commentary."}
+  ],
+  "The Enlightenment and The Shtetl":[
+    {h:"הַשְׂכָּלָה",t:"Haskalah",m:"Jewish Enlightenment — 18th–19th century movement to engage modern thought",c:"Led by Moses Mendelssohn. Set the stage for Reform Judaism."},
+    {h:"שְׁטֶעטְל",t:"Shtetl",m:"Yiddish for 'small town' — the Eastern European Jewish village",c:"Centers of Yiddish-speaking, Ashkenazi life until destroyed in the Holocaust."},
+    {h:"אֵמַנְצִיפַּצְיָה",t:"Emancipation",m:"Granting Jews legal/civic equality in modern European states",c:"Began with Napoleon. Created the modern condition: Jewishness as religion, not ethnicity."}
+  ],
+  "Out of the Ashes":[
+    {h:"שׁוֹאָה",t:"Shoah",m:"Holocaust — literally 'catastrophe.' The systematic Nazi murder of 6 million Jews",c:"'Holocaust' (Greek for burnt offering) is also used; many Jews prefer 'Shoah.'"},
+    {h:"שְׁאֵרִית הַפְּלֵיטָה",t:"Sh'erit HaPletah",m:"The remnant who survived — the surviving Jews after the Shoah",c:"The displaced-persons generation that built modern Israel and post-war American Jewry."},
+    {h:"זָכוֹר",t:"Zachor",m:"Remember — the Jewish ethical command never to forget",c:"'Never again' begins with 'always remember.'"}
+  ],
+  "Rabbi Patrick Podcast Break: Being Jewish Alone":[
+    {h:"מִנְיָן",t:"Minyan",m:"Quorum of 10 adult Jews required for full communal prayer",c:"Without 10, you can pray, but skip mourner's kaddish, Torah reading, etc."},
+    {h:"קְהִלָּה",t:"Kehillah",m:"Community — the irreducibly social dimension of Jewish life",c:"Judaism resists being purely private. Even the most private mitzvot point toward community."}
+  ],
+  "Jewish Life Today & Into the Future":[
+    {h:"רֵפוֹרְמָה",t:"Reform",m:"The largest North American Jewish movement — the one you're joining",c:"Began 19th century Germany. Embraces converts, gender equality, evolving halakhah."},
+    {h:"קוֹנְסֶרְבָטִיבִי",t:"Conservative / Masorti",m:"Middle path between Reform and Orthodox — 'Masorti' (traditional) outside North America",c:"More halakhically observant than Reform; egalitarian like Reform."},
+    {h:"רֵקוֹנְסְטְרוּקְצְיוֹנִיסְט",t:"Reconstructionist",m:"Smaller movement — Judaism as 'evolving religious civilization' (Mordecai Kaplan)",c:"Pioneered bat mitzvah, LGBTQ+ inclusion, and democratic ritual."}
+  ],
+
+  // ═══ Jewish & Israeli History (NEW SECTION) ═══
+  "Origins: Abraham and the Birth of Judaism":[
+    {h:"אַבְרָהָם",t:"Avraham",m:"Abraham — the first Jew, who 'discovered' monotheism and made covenant with God",c:"Born in Ur (modern Iraq). Left for Canaan around 1800 BCE in Jewish tradition."},
+    {h:"שָׂרָה",t:"Sarah",m:"Sarah — Abraham's wife, the first Jewish woman",c:"Female converts take her name: bat Avraham v'Sarah."},
+    {h:"בְּרִית",t:"Brit",m:"Covenant — the binding agreement between God and the Jewish people",c:"Sealed with Abraham in Genesis 17. Renewed at Sinai with Moses."},
+    {h:"כְּנַעַן",t:"Canaan",m:"Canaan — the ancient name for the Land of Israel",c:"Promised to Abraham; later called Eretz Yisrael."}
+  ],
+  "Exodus & Sinai: Forging a People":[
+    {h:"יְצִיאַת מִצְרַיִם",t:"Yetziat Mitzrayim",m:"The Exodus from Egypt — Judaism's foundational liberation story",c:"Retold every Pesach. 'Mitzrayim' literally means 'narrow places.'"},
+    {h:"מֹשֶׁה",t:"Moshe",m:"Moses — the prophet who led the Israelites out of Egypt",c:"Receives the Torah at Sinai. Called 'Moshe Rabbeinu' — Moses our teacher."},
+    {h:"מַתַּן תּוֹרָה",t:"Matan Torah",m:"Giving of the Torah — at Mount Sinai, the central Jewish covenantal moment",c:"Celebrated on Shavuot. The Israelites became a covenanted people here."},
+    {h:"עֲשֶׂרֶת הַדִּבְּרוֹת",t:"Aseret HaDibrot",m:"The Ten Commandments — given at Sinai",c:"Literally 'Ten Sayings.' Cornerstone of Jewish ethics and Western law."}
+  ],
+  "The Israelite Kingdoms & The First Temple":[
+    {h:"דָּוִד הַמֶּלֶךְ",t:"David HaMelech",m:"King David — second king of Israel, traditional author of many Psalms",c:"Founded the Davidic dynasty. The Mashiach is descended from David."},
+    {h:"שְׁלֹמֹה",t:"Shlomo",m:"Solomon — David's son, who built the First Temple in Jerusalem (~950 BCE)",c:"Tradition: author of Proverbs, Song of Songs, Ecclesiastes."},
+    {h:"בֵּית הַמִּקְדָּשׁ הָרִאשׁוֹן",t:"Beit HaMikdash HaRishon",m:"The First Temple — center of Israelite worship until 586 BCE",c:"Destroyed by the Babylonians under Nebuchadnezzar."},
+    {h:"יְרוּשָׁלַיִם",t:"Yerushalayim",m:"Jerusalem — David's capital, eternal heart of the Jewish people",c:"'If I forget thee, O Jerusalem...' (Psalm 137)."}
+  ],
+  "Babylonian Exile & The Birth of Judaism (as we know it)":[
+    {h:"גָּלוּת בָּבֶל",t:"Galut Bavel",m:"Babylonian Exile — 586 BCE, after the First Temple's destruction",c:"Traumatic but transformative: Judaism developed Torah-centered, synagogue-based life here."},
+    {h:"בֵּית כְּנֶסֶת",t:"Beit Knesset",m:"Synagogue — literally 'house of gathering.' Born during the Babylonian Exile",c:"When the Temple was gone, Jews gathered for prayer and Torah reading instead of sacrifice."},
+    {h:"כּוֹרֶשׁ",t:"Koresh (Cyrus)",m:"Persian king who allowed Jews to return to Judah and rebuild the Temple (538 BCE)",c:"Called 'mashiach' (anointed) by Isaiah — the only non-Jew given that title."}
+  ],
+  "The Second Temple Era & Roman Rule":[
+    {h:"בֵּית הַמִּקְדָּשׁ הַשֵּׁנִי",t:"Beit HaMikdash HaSheni",m:"The Second Temple — rebuilt 516 BCE, expanded by Herod, destroyed 70 CE",c:"Standing for nearly 600 years. Its destruction reshaped Judaism forever."},
+    {h:"פְּרוּשִׁים",t:"P'rushim",m:"Pharisees — the Jewish sect that became the rabbis",c:"Survived the Second Temple's destruction by emphasizing Torah and oral tradition."},
+    {h:"מַכַּבִּים",t:"Makabim",m:"Maccabees — Jewish rebels (167-160 BCE) who fought the Seleucid Greeks",c:"The Hanukkah story. Established the Hasmonean dynasty."},
+    {h:"בַּר כּוֹכְבָא",t:"Bar Kochba",m:"Leader of the failed Jewish revolt against Rome (132-135 CE)",c:"His defeat led to the final Jewish exile from Judea for nearly 1,900 years."}
+  ],
+  "Destruction, Diaspora & Rabbinic Judaism":[
+    {h:"חֻרְבַּן בֵּית שֵׁנִי",t:"Churban Bayit Sheni",m:"Destruction of the Second Temple by Rome, 70 CE",c:"The pivot of Jewish history: from Temple Judaism to Rabbinic Judaism."},
+    {h:"רַבִּי יוֹחָנָן בֶּן זַכַּאי",t:"Rabbi Yochanan ben Zakkai",m:"Rabbi who escaped Jerusalem in a coffin and founded Yavneh — the seed of rabbinic Judaism",c:"Famously asked Rome for 'Yavneh and its sages,' saving Torah for the Diaspora."},
+    {h:"יַבְנֶה",t:"Yavneh",m:"Coastal town where rabbinic Judaism was reconstituted after 70 CE",c:"Where the Jewish canon was finalized and the synagogue replaced the Temple."},
+    {h:"מִשְׁנָה",t:"Mishnah",m:"First major rabbinic legal compilation, 200 CE — by Rabbi Judah HaNasi",c:"Six 'orders' of Jewish law. The foundation of the Talmud."}
+  ],
+  "The Medieval World: Christendom & Islam":[
+    {h:"תּוֹר הַזָּהָב",t:"Tor HaZahav",m:"The 'Golden Age' — Jewish flourishing in Muslim Spain (10th–12th centuries)",c:"Maimonides, Yehudah HaLevi, Ibn Gabirol — all from this era."},
+    {h:"קַבָּלָה",t:"Kabbalah",m:"Jewish mysticism — flowered in 13th century Spain and 16th century Tzfat",c:"Central text: the Zohar. Cornerstone of Jewish spiritual tradition."},
+    {h:"הַזֹּהַר",t:"HaZohar",m:"The 'Book of Splendor' — central text of Kabbalah, written ~1280 CE",c:"Attributed by tradition to Rabbi Shimon bar Yochai (2nd century)."},
+    {h:"פּוֹגְרוֹם",t:"Pogrom",m:"Organized violent attack on a Jewish community",c:"Recurring throughout medieval and early modern Europe — especially Eastern Europe."}
+  ],
+  "Expulsion, Mysticism & The Early Modern Period":[
+    {h:"גֵּרוּשׁ סְפָרַד",t:"Gerush Sepharad",m:"Expulsion from Spain, 1492 — same year Columbus sailed",c:"Spanish Jews scattered to the Ottoman Empire, North Africa, the Netherlands."},
+    {h:"אֲנוּסִים",t:"Anusim",m:"'Forced ones' — Jews forcibly converted to Christianity who secretly kept Judaism",c:"Also called Conversos or Marranos. Many descendants exist today in Latin America and the American Southwest."},
+    {h:"צְפַת",t:"Tzfat (Safed)",m:"Mystical Galilean city — center of 16th century Kabbalah",c:"Home to Isaac Luria, the Arizal — whose teachings shape Jewish mysticism still."},
+    {h:"חֲסִידוּת",t:"Chasidut",m:"Hasidism — 18th century mystical revival movement",c:"Founded by the Baal Shem Tov in Eastern Europe. Emphasis on joy, song, and personal connection to God."}
+  ],
+  "Enlightenment, Emancipation & Reform":[
+    {h:"מֹשֶׁה מֶנְדֶלְסוֹן",t:"Moshe Mendelssohn",m:"Father of the Haskalah (Jewish Enlightenment) — 18th century Berlin",c:"Translated the Torah into German. Argued Jews could be both modern and observant."},
+    {h:"רֵפוֹרְמָה",t:"Reformah",m:"Reform Judaism — the modernizing movement that began in 1810s Germany",c:"Embraced ethical monotheism, vernacular prayer, equality of men and women. Your stream."},
+    {h:"רַב אַבְרָהָם גֵּיְיגֶר",t:"Avraham Geiger",m:"Founding intellectual of Reform Judaism (1810–1874)",c:"Argued Judaism is an ever-evolving religious civilization."}
+  ],
+  "The Holocaust (Shoah)":[
+    {h:"הַשּׁוֹאָה",t:"HaShoah",m:"The Holocaust — Nazi Germany's systematic murder of 6 million Jews (1933–1945)",c:"The defining catastrophe of modern Jewish history. Two-thirds of European Jewry was killed."},
+    {h:"גֶּטָאוֹת",t:"Geta'ot",m:"Ghettos — Nazi-imposed segregated Jewish quarters, especially in Eastern Europe",c:"Warsaw, Lodz, Vilna. Sites of horrific suffering and remarkable resistance."},
+    {h:"מַחֲנוֹת רֶכֶז",t:"Machanot Rikuz",m:"Concentration camps — including the death camps Auschwitz, Treblinka, Sobibor",c:"Six million Jews murdered, plus millions of Roma, queer people, disabled people, dissidents."},
+    {h:"גְּבוּרָה",t:"G'vurah",m:"Heroism — recognized in 'Yom HaShoah v'haG'vurah' (Holocaust and Heroism Day)",c:"Honors both victims and resisters: Warsaw Ghetto Uprising, partisans, Righteous Gentiles."}
+  ],
+  "Zionism & The Founding of Modern Israel":[
+    {h:"צִיּוֹנוּת",t:"Tziyonut",m:"Zionism — the movement for Jewish self-determination in the Land of Israel",c:"Founded by Theodor Herzl in the 1890s. Many branches: political, cultural, religious, labor."},
+    {h:"תֵּאוֹדוֹר הֶרְצְל",t:"Theodor Herzl",m:"Father of modern political Zionism (1860–1904)",c:"Wrote 'Der Judenstaat' (The Jewish State) in 1896."},
+    {h:"עֲלִיָּה",t:"Aliyah",m:"'Going up' — immigrating to the Land of Israel",c:"Five major aliyot brought hundreds of thousands of Jews to pre-state Palestine."},
+    {h:"מְדִינַת יִשְׂרָאֵל",t:"Medinat Yisrael",m:"The State of Israel — declared 14 May 1948 (5 Iyar 5708)",c:"Re-established Jewish sovereignty in the homeland after nearly 1,900 years."}
+  ],
+  "Modern Israel: Wars, Peace & Society Today":[
+    {h:"מִלְחֶמֶת הָעַצְמָאוּת",t:"Milchemet Ha'atzmaut",m:"War of Independence — 1948, fought immediately after Israel's founding",c:"Israel survived against five Arab armies. About 1% of the population was killed."},
+    {h:"מִלְחֶמֶת שֵׁשֶׁת הַיָּמִים",t:"Milchemet Sheshet HaYamim",m:"Six-Day War — June 1967",c:"Israel captured the West Bank, Gaza, Sinai, Golan, and reunited Jerusalem. The roots of today's politics."},
+    {h:"מִלְחֶמֶת יוֹם כִּפּוּר",t:"Milchemet Yom Kippur",m:"Yom Kippur War — 1973, surprise attack by Egypt and Syria",c:"Israel survived but at heavy cost. Led eventually to peace with Egypt (1979)."},
+    {h:"כְּנֶסֶת",t:"Knesset",m:"Israel's parliament — 120 members elected by proportional representation",c:"Located in Jerusalem. Named after the Great Assembly of the Second Temple era."}
+  ],
+
+  // ═══ Basic Hebrew (rest) ═══
+  "Introductory Reading":[
+    {h:"נִקּוּד",t:"Nikkud",m:"Vowel marks — small dots and lines beneath/inside Hebrew letters",c:"Modern Israeli Hebrew is usually written without nikkud; learners use them at first."},
+    {h:"קָמַץ",t:"Kamatz",m:"The vowel mark for 'a' (or 'o' in some cases) — looks like a small T",c:"One of the most common Hebrew vowels."},
+    {h:"פַּתָּח",t:"Patach",m:"The vowel mark for 'a' — a horizontal dash",c:"Distinguished from kamatz by shape; pronounced similarly in modern Hebrew."}
+  ],
+
+  // ═══ Worship & Spirituality (rest) ═══
+  "Shabbat Evening Prayer Basics":[
+    {h:"קַבָּלַת שַׁבָּת",t:"Kabbalat Shabbat",m:"'Receiving the Sabbath' — the Friday-evening service welcoming Shabbat",c:"Includes Psalms 95-99 and the famous hymn Lecha Dodi."},
+    {h:"לְכָה דוֹדִי",t:"Lecha Dodi",m:"'Come, my beloved' — the central hymn of Kabbalat Shabbat",c:"Written by Rabbi Shlomo Halevi Alkabetz in 16th century Tzfat."},
+    {h:"בָּרְכוּ",t:"Bar'chu",m:"Call to prayer — 'Bless the Lord!'",c:"Said standing, with bowing. Marks the start of formal communal prayer."}
+  ],
+  "Rabbi Patrick Podcast Break: Dealing With Rabbis":[
+    {h:"רַב",t:"Rav / Rabbi",m:"Teacher — literally 'great one' or 'master'",c:"Reform rabbis are ordained from seminaries like HUC-JIR. Address as 'Rabbi [first name]' typically."},
+    {h:"רַבָּנִית",t:"Rabbanit",m:"Female rabbi or rabbi's wife (depending on movement)",c:"Reform/Conservative use the title for ordained women rabbis. Orthodox uses it for the rabbi's wife."}
+  ],
+  "Synagogue Services":[
+    {h:"שַׁחֲרִית",t:"Shacharit",m:"Morning service — the longest of the three daily services",c:"Includes the Shema, Amidah, and (on Shabbat/holidays) Torah reading."},
+    {h:"מִנְחָה",t:"Mincha",m:"Afternoon service — short, said before sunset",c:"Includes Ashrei (Psalm 145) and a shorter Amidah."},
+    {h:"מַעֲרִיב",t:"Ma'ariv",m:"Evening service — said after nightfall",c:"Also includes the Shema and Amidah; often combined with Mincha at Shabbat services."}
+  ],
+  "Jewish Spirituality & Meditation":[
+    {h:"הִתְבּוֹדְדוּת",t:"Hitbod'dut",m:"Personal meditative prayer — speaking spontaneously to God in your own words",c:"Especially associated with Rabbi Nachman of Breslov."},
+    {h:"דְּבֵקוּת",t:"D'veikut",m:"Cleaving / clinging — mystical union with God",c:"Hasidic ideal: every action becomes a moment of d'veikut."},
+    {h:"מוּסָר",t:"Mussar",m:"Ethical/character work — 19th-century movement of self-refinement",c:"Practices for cultivating middot (character traits): patience, gratitude, humility."}
+  ],
+  "Mentorship and Conversion Essay":[
+    {h:"מַשְׁפִּיעַ",t:"Mashpia",m:"Mentor / spiritual influencer — a guide for your conversion journey",c:"Rabbi Brian (rB) is your mashpia. Build trust; share doubts; ask questions."},
+    {h:"וִדּוּי",t:"Vidui",m:"Confession — the conversion essay echoes this tradition of self-examination",c:"Your essay is a kind of vidui: an honest accounting of your journey."}
   ]
 };
 
@@ -620,6 +983,8 @@ function persistActive(){
     surveyData:S.surveyData,dyProgress:S.dyProgress,tasksDone:S.tasksDone,
     mediaProgress:S.mediaProgress,deepLessons:S.deepLessons,
     chatMsgs:S.chatMsgs,
+    lessonChats:S.lessonChats,
+    lessonView:S.lessonView,
     flashBoxes:S.flashBoxes,
     streak:S.streak
   };
@@ -635,6 +1000,8 @@ function applyProfileData(data){
   S.mediaProgress=data.mediaProgress||{};
   S.deepLessons=data.deepLessons||{};
   S.chatMsgs=data.chatMsgs||[];
+  S.lessonChats=data.lessonChats||{};
+  S.lessonView=data.lessonView||null;
   S.flashBoxes=data.flashBoxes||{};
   S.streak=data.streak||{count:0,lastDay:null,longest:0};
 }
@@ -642,7 +1009,7 @@ function applyProfileData(data){
 function logout(){
   ACTIVE={name:null,key:null};
   S.surveyData={};S.dyProgress={};S.tasksDone={};S.mediaProgress={};S.deepLessons={};
-  S.chatMsgs=[];S.quizLeaderboard={};
+  S.chatMsgs=[];S.lessonChats={};S.lessonChatIn="";S.quizLeaderboard={};
   S.flashIdx=0;S.flipped=false;S.flashPool=null;
   S.quizQuestions=null;S.quizIdx=0;S.quizScore=0;S.quizDone=false;
   S.flashBoxes={};
@@ -941,6 +1308,9 @@ var S = {
   quizQuestions:null, quizIdx:0, quizPick:null, quizScore:0, quizDone:false, quizTotal:10,
   quizName:"", quizLeaderboard:{},
   lessonView:null, deepLessons:{}, deepBusy:false,
+  lessonChats:{}, lessonChatIn:"", lessonChatBusy:false,
+  bookPreviewOpen:{}, // {bookTitle: true} when expanded
+  edOpen:{}, // {edCtxKey: true} for everyday-phrase context expanded
   holidayIdx:0, lifecycleIdx:0, alefIdx:0,
   dyProgress:{}, tasksDone:{},
   // Adaptive quiz state
@@ -1206,11 +1576,36 @@ function renderHome(){
   // Priority reading
   h+='<div class="card">';
   h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:20px">📖</span><h3>Priority Reading (from rB)</h3></div>';
+  h+='<div style="font-size:11px;color:#888;margin-bottom:10px;font-style:italic">🎧 Tap any book for an Audible-listener preview</div>';
   READING_LIST.priority.forEach(function(b){
-    h+='<div style="padding:8px 0;border-bottom:1px solid #f5f5f5"><div style="font-size:14px;font-weight:600">'+esc(b.t)+'</div><div style="font-size:12px;color:#888">'+esc(b.a)+'</div><div style="font-size:11px;color:#f9a825;margin-top:2px">'+esc(b.note)+'</div></div>';
+    var open=!!S.bookPreviewOpen[b.t];
+    h+='<div style="padding:8px 0;border-bottom:1px solid #f5f5f5">';
+    h+='<button class="bookToggle" data-book="'+esc(b.t)+'" style="background:none;border:none;padding:0;text-align:left;width:100%;cursor:pointer;font-family:inherit">';
+    h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div style="font-size:14px;font-weight:600">'+esc(b.t)+'</div><div style="font-size:12px;color:#888">'+esc(b.a)+'</div><div style="font-size:11px;color:#f9a825;margin-top:2px">'+esc(b.note)+'</div></div><span style="font-size:14px;color:#888;flex-shrink:0">'+(open?"▾":"▸")+'</span></div>';
+    h+='</button>';
+    if(open&&BOOK_PREVIEWS[b.t])h+=renderBookPreview(b.t,"#4caf50");
+    h+='</div>';
   });
   h+='</div>';
 
+  return h;
+}
+
+function renderBookPreview(title,color){
+  var p=BOOK_PREVIEWS[title];
+  if(!p)return '';
+  var h='<div style="margin-top:10px;padding:14px;background:#fafaf8;border-radius:10px;border-left:3px solid '+color+'">';
+  h+='<div style="font-size:10px;font-weight:700;color:'+color+';text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">🎧 Audible Listener Preview · '+esc(p.audible_hours)+'</div>';
+  h+='<div style="font-size:12px;color:#444;line-height:1.6;margin-bottom:10px"><b>Why rB chose it:</b> '+esc(p.why)+'</div>';
+  h+='<div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.3px;margin:10px 0 4px">📖 What it\'s about</div>';
+  h+='<div style="font-size:12px;color:#444;line-height:1.6">'+esc(p.overview)+'</div>';
+  h+='<div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.3px;margin:12px 0 4px">💡 Main teaching points</div>';
+  h+='<ul style="margin:0;padding-left:20px;font-size:12px;color:#444;line-height:1.6">';
+  p.takeaways.forEach(function(t){h+='<li style="margin-bottom:6px">'+esc(t)+'</li>'});
+  h+='</ul>';
+  h+='<div style="font-size:11px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.3px;margin:12px 0 4px">🎧 How to listen</div>';
+  h+='<div style="font-size:12px;color:#444;line-height:1.6;font-style:italic">'+esc(p.listening_tips)+'</div>';
+  h+='</div>';
   return h;
 }
 
@@ -1259,11 +1654,30 @@ function renderSub(){
   }
 
   else if(sp==="everyday"){
-    h+='<h2 style="margin-bottom:14px">Everyday Phrases</h2>';
-    EVERYDAY.forEach(function(p){
-      h+='<div class="card">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="flex:1"><div class="hebrew" style="font-size:26px">'+p.h+'</div><div class="translit">'+p.t+'</div><div class="meaning" style="margin-top:4px">'+p.m+'</div></div><button class="speak-btn" data-speak="'+esc(p.h)+'">🔊</button></div>';
-      if(p.c)h+='<div class="context">'+p.c+'</div>';
+    var totalEd=EVERYDAY_GROUPS.reduce(function(a,g){return a+g.items.length},0);
+    h+='<h2 style="margin-bottom:6px">Everyday Phrases</h2>';
+    h+='<p style="font-size:13px;color:#888;margin-bottom:14px">'+totalEd+' phrases across '+EVERYDAY_GROUPS.length+' groups · tap any phrase for context</p>';
+    EVERYDAY_GROUPS.forEach(function(g,gi){
+      h+='<div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">';
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:14px 16px;background:#f5f3ee;border-bottom:1px solid #eee"><span style="font-size:18px">'+g.icon+'</span><h3 style="font-size:14px;font-weight:700;color:#1a1a2e">'+esc(g.label)+'</h3><span style="margin-left:auto;font-size:11px;color:#999;font-weight:600">'+g.items.length+'</span></div>';
+      g.items.forEach(function(p,pi){
+        var ctxKey="ed_"+gi+"_"+pi;
+        var open=!!S.edOpen&&S.edOpen[ctxKey];
+        h+='<div class="ed-row" data-edctx="'+ctxKey+'" '+(p.c?'style="cursor:pointer"':'')+'>';
+        h+='<div style="display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 16px;'+(pi>0?'border-top:1px solid #f5f5f5':'')+'">';
+        h+='<div style="min-width:0">';
+        h+='<div class="hebrew" style="font-size:20px;line-height:1.2">'+p.h+'</div>';
+        h+='<div style="font-size:12px;color:#666;font-style:italic;margin-top:1px">'+esc(p.t)+' · <span style="color:#1a1a2e;font-style:normal">'+esc(p.m)+'</span></div>';
+        h+='</div>';
+        h+='<button class="speak-btn" data-speak="'+esc(p.h)+'" style="padding:4px 8px;font-size:14px">🔊</button>';
+        if(p.c)h+='<span style="font-size:11px;color:#bbb;width:14px;text-align:center">'+(open?"▾":"ⓘ")+'</span>';
+        else h+='<span style="width:14px"></span>';
+        h+='</div>';
+        if(p.c&&open){
+          h+='<div style="padding:0 16px 10px"><div style="font-size:12px;color:#666;line-height:1.5;background:#fafaf8;border-radius:8px;padding:8px 12px">'+esc(p.c)+'</div></div>';
+        }
+        h+='</div>';
+      });
       h+='</div>';
     });
   }
@@ -1405,6 +1819,32 @@ function renderSub(){
       }
       h+='</div>';
 
+      // Lesson Chatbot — ask follow-up questions about THIS lesson
+      var chatLog=S.lessonChats[lv]||[];
+      h+='<div style="font-size:12px;font-weight:700;color:#7c4dff;text-transform:uppercase;letter-spacing:.5px;margin:20px 0 8px">💬 Ask follow-up questions</div>';
+      h+='<p style="font-size:12px;color:#888;margin-bottom:10px">Stuck on something? Curious about a deeper angle? Ask anything about <em>'+esc(lv)+'</em> — your tutor remembers this lesson and rB\'s teaching style.</p>';
+      h+='<div class="chat-box" style="border-color:#7c4dff">';
+      h+='<div class="chat-msgs" id="lessonChatMsgs" style="max-height:300px">';
+      if(chatLog.length===0){
+        h+='<div style="text-align:center;padding:24px 16px;color:#bbb;font-size:13px;line-height:1.6">No questions yet. Try:<br><span style="color:#7c4dff;font-weight:600">"Why does this matter for my conversion?"</span><br><span style="color:#7c4dff;font-weight:600">"What would Rabbi Brian want me to know?"</span></div>';
+      }
+      chatLog.forEach(function(m){
+        h+='<div class="chat-msg '+(m.r==="u"?"user":"")+'"><div class="chat-bubble '+(m.r==="u"?"user":"bot")+'" style="'+(m.r==="u"?"background:#7c4dff":"")+'">'+esc(m.t).replace(/\n/g,"<br>")+'</div></div>';
+      });
+      if(S.lessonChatBusy)h+='<div class="chat-msg"><div class="chat-bubble bot" style="font-style:italic;color:#999">Thinking about '+esc(lv)+'...</div></div>';
+      h+='</div>';
+      h+='<div class="chat-input-row"><input class="chat-input" id="lessonChatIn" value="'+esc(S.lessonChatIn)+'" placeholder="Ask about this lesson..."><button class="chat-send" id="lessonChatSend" data-topic="'+esc(lv)+'" style="background:'+(S.lessonChatIn.trim()?"#7c4dff":"#ccc")+';cursor:'+(S.lessonChatIn.trim()?"pointer":"default")+'">→</button></div>';
+      h+='</div>';
+      // Quick prompts
+      h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">';
+      ["Summarize this in 3 sentences","What\'s the practical takeaway?","Give me an example","How does this apply to Reform?","What should I ask rB about this?"].forEach(function(q){
+        h+='<button class="tag lessonQuickQ" data-quickq="'+esc(q)+'" data-topic="'+esc(lv)+'" style="background:#ede7f6;color:#7c4dff;cursor:pointer;border:none;font-family:inherit">'+q+'</button>';
+      });
+      h+='</div>';
+      if(chatLog.length>0){
+        h+='<button class="btn btn-outline btn-sm" id="lessonChatClear" data-topic="'+esc(lv)+'" style="margin-top:10px;color:#999;border-color:#ddd">🗑️ Clear chat history</button>';
+      }
+
       return h;
     }
 
@@ -1469,17 +1909,39 @@ function renderMedia(){
   if(mediaTab==="books"){
     // Priority reads
     h+='<div style="font-size:12px;font-weight:700;color:#f9a825;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">⭐ Start With These</div>';
+    h+='<div style="font-size:11px;color:#888;margin-bottom:10px;font-style:italic">🎧 Tap a book to expand the Audible-listener preview — what it\'s about, main teaching points, how to listen</div>';
     MEDIA.priority_books.forEach(function(b){
-      h+='<div class="card" style="border-left:4px solid #f9a825;background:'+b.color+'">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-size:15px;font-weight:700">'+esc(b.t)+'</div><div style="font-size:13px;color:#666;margin-top:2px">'+esc(b.a)+'</div></div><span class="tag" style="background:#f9a825;color:#fff;flex-shrink:0">'+b.tag+'</span></div>';
+      var open=!!S.bookPreviewOpen[b.t];
+      h+='<div class="card" style="border-left:4px solid #f9a825;background:'+b.color+';padding:0;overflow:hidden">';
+      h+='<button class="bookToggle" data-book="'+esc(b.t)+'" style="background:none;border:none;padding:18px 20px;text-align:left;width:100%;cursor:pointer;font-family:inherit;display:block">';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div style="font-size:15px;font-weight:700">'+esc(b.t)+'</div><div style="font-size:13px;color:#666;margin-top:2px">'+esc(b.a)+'</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0"><span class="tag" style="background:#f9a825;color:#fff">'+b.tag+'</span><span style="font-size:14px;color:#888">'+(open?"▾":"▸")+'</span></div></div>';
+      h+='</button>';
+      if(open&&BOOK_PREVIEWS[b.t]){
+        h+='<div style="padding:0 20px 18px">';
+        h+=renderBookPreview(b.t,"#f9a825");
+        h+='</div>';
+      }
       h+='</div>';
     });
 
     // Completed
     h+='<div style="font-size:12px;font-weight:700;color:#4caf50;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px">✅ Completed</div>';
     MEDIA.completed_books.forEach(function(b){
-      h+='<div class="card" style="opacity:.7"><div style="font-size:14px;font-weight:600;text-decoration:line-through">'+esc(b.t)+'</div><div style="font-size:12px;color:#888">'+esc(b.a)+'</div>';
-      if(b.note)h+='<div style="font-size:11px;color:#4caf50;margin-top:4px">'+esc(b.note)+'</div>';
+      var open=!!S.bookPreviewOpen[b.t];
+      var hasPrev=!!BOOK_PREVIEWS[b.t];
+      h+='<div class="card" style="padding:0;overflow:hidden;'+(hasPrev?"":"opacity:.7")+'">';
+      if(hasPrev){
+        h+='<button class="bookToggle" data-book="'+esc(b.t)+'" style="background:none;border:none;padding:18px 20px;text-align:left;width:100%;cursor:pointer;font-family:inherit;display:block">';
+        h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="flex:1"><div style="font-size:14px;font-weight:600">'+esc(b.t)+'</div><div style="font-size:12px;color:#888">'+esc(b.a)+'</div>';
+        if(b.note)h+='<div style="font-size:11px;color:#4caf50;margin-top:4px">'+esc(b.note)+'</div>';
+        h+='</div><span style="font-size:14px;color:#888;flex-shrink:0">'+(open?"▾":"▸")+'</span></div>';
+        h+='</button>';
+        if(open){h+='<div style="padding:0 20px 18px">'+renderBookPreview(b.t,"#4caf50")+'</div>'}
+      }else{
+        h+='<div style="padding:18px 20px"><div style="font-size:14px;font-weight:600;text-decoration:line-through">'+esc(b.t)+'</div><div style="font-size:12px;color:#888">'+esc(b.a)+'</div>';
+        if(b.note)h+='<div style="font-size:11px;color:#4caf50;margin-top:4px">'+esc(b.note)+'</div>';
+        h+='</div>';
+      }
       h+='</div>';
     });
 
@@ -2015,6 +2477,39 @@ function generateReport(){
   a.click();
 }
 
+async function sendLessonChat(topic){
+  if(!S.lessonChatIn.trim()||S.lessonChatBusy)return;
+  var key=getKey();if(!key)return;
+  if(!S.lessonChats[topic])S.lessonChats[topic]=[];
+  var msg=S.lessonChatIn.trim();S.lessonChatIn="";S.lessonChatBusy=true;
+  S.lessonChats[topic].push({r:"u",t:msg});saveState();render();
+  // Build a system prompt that pins the conversation to this lesson topic
+  var lessonText=COURSE_LESSONS[topic]||"";
+  var cardsText="";
+  if(COURSE_CONTENT[topic]){
+    cardsText=COURSE_CONTENT[topic].map(function(c){return c.t+" ("+c.h+") — "+c.m}).join("; ");
+  }
+  var studentName=ACTIVE.name||"the student";
+  var sys="You are a warm, patient tutor in a Reform Judaism conversion app. The student's name is "+studentName+" and she studies with Rabbi Brian (rB). She is currently inside the Darshan Yeshiva course module titled \""+topic+"\" and is asking a follow-up question about THIS specific lesson.\n\nLESSON TEXT:\n"+(lessonText||"(no built-in text — answer from general Jewish knowledge for this module title)")+"\n\nKEY TERMS FROM THIS MODULE: "+(cardsText||"(none)")+"\n\nINSTRUCTIONS:\n- Stay focused on this module's topic. If the student wanders off-topic, gently redirect.\n- Use Hebrew with transliteration when referencing terms (Hebrew script + transliteration + meaning).\n- Reform-tradition framing, Sephardic/Modern Israeli pronunciation.\n- Conversational, encouraging, no jargon walls. 2-4 paragraphs typically.\n- If you're not sure of something, say so honestly.\n- Reference Rabbi Brian's emphasis on lived practice over performative knowledge when relevant.";
+  var msgs=S.lessonChats[topic].map(function(m){return{role:m.r==="u"?"user":"assistant",content:m.t}});
+  try{
+    var res=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:sys,messages:msgs})
+    });
+    if(!res.ok){var e=await res.text();throw new Error(res.status+": "+e.slice(0,200))}
+    var data=await res.json();
+    var reply=data.content.map(function(b){return b.text||""}).join("");
+    S.lessonChats[topic].push({r:"a",t:reply});
+  }catch(e){
+    S.lessonChats[topic].push({r:"a",t:"Error: "+e.message});
+    if(e.message.indexOf("401")>-1)localStorage.removeItem("anthropic_key");
+  }
+  S.lessonChatBusy=false;saveState();render();
+  setTimeout(function(){var el=document.getElementById("lessonChatMsgs");if(el)el.scrollTop=el.scrollHeight},50);
+}
+
 async function sendChat(){
   if(!S.chatIn.trim()||S.chatBusy)return;
   var key=getKey();if(!key)return;
@@ -2043,8 +2538,16 @@ async function sendChat(){
 
 // ═══════════════ EVENTS ═══════════════
 function bindEvents(){
-  // Nav
-  document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){S.page=b.dataset.pg;S.subpage=(S.page==="darshan"?"course":null);S.flipped=false;S.lessonView=null;if(S.page==="quiz")loadLeaderboard();render()}});
+  // Nav — preserves S.lessonView so the Darshan tab resumes where you left off.
+  // Lesson view is only cleared by the explicit "← Back to Course" button.
+  document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){
+    S.page=b.dataset.pg;
+    S.subpage=(S.page==="darshan"?"course":null);
+    S.flipped=false;
+    // Don't reset lessonView — user wants to resume their last Darshan lesson on return.
+    if(S.page==="quiz")loadLeaderboard();
+    render();
+  }});
 
   // Home quick links
   document.querySelectorAll("[data-go]").forEach(function(b){b.onclick=function(){S.page=b.dataset.go;if(S.page==="quiz")loadLeaderboard();render()}});
@@ -2129,11 +2632,63 @@ function bindEvents(){
   }
   var cs=document.getElementById("chatSend");if(cs)cs.onclick=sendChat;
 
-  // Quick questions
-  document.querySelectorAll("[data-quickq]").forEach(function(b){b.onclick=function(){S.chatIn=b.dataset.quickq;render();setTimeout(sendChat,100)}});
+  // Quick questions (main tutor only — exclude lesson quick questions)
+  document.querySelectorAll("[data-quickq]:not(.lessonQuickQ)").forEach(function(b){b.onclick=function(){S.chatIn=b.dataset.quickq;render();setTimeout(sendChat,100)}});
+
+  // Lesson chatbot — input
+  var lci=document.getElementById("lessonChatIn");
+  if(lci){
+    lci.oninput=function(e){
+      S.lessonChatIn=e.target.value;
+      var sb=document.getElementById("lessonChatSend");
+      if(sb){sb.style.background=S.lessonChatIn.trim()?"#7c4dff":"#ccc";sb.style.cursor=S.lessonChatIn.trim()?"pointer":"default"}
+    };
+    lci.onkeydown=function(e){if(e.key==="Enter"){e.preventDefault();var btn=document.getElementById("lessonChatSend");if(btn)btn.click()}};
+  }
+  var lcs=document.getElementById("lessonChatSend");
+  if(lcs)lcs.onclick=function(){var t=lcs.dataset.topic;sendLessonChat(t)};
+  // Lesson quick prompts
+  document.querySelectorAll(".lessonQuickQ").forEach(function(b){
+    b.onclick=function(){
+      S.lessonChatIn=b.dataset.quickq;
+      render();
+      setTimeout(function(){sendLessonChat(b.dataset.topic)},100);
+    };
+  });
+  // Clear lesson chat
+  var lcc=document.getElementById("lessonChatClear");
+  if(lcc)lcc.onclick=function(){
+    var t=lcc.dataset.topic;
+    if(confirm("Clear all chat history for this lesson?")){
+      delete S.lessonChats[t];
+      saveState();render();
+    }
+  };
+  // Auto-scroll lesson chat to bottom on render
+  var lcm=document.getElementById("lessonChatMsgs");
+  if(lcm)lcm.scrollTop=lcm.scrollHeight;
 
   // Media tabs
   document.querySelectorAll("[data-mtab]").forEach(function(b){b.onclick=function(){S.mediaTab=b.dataset.mtab;render()}});
+
+  // Book preview toggle (priority readings)
+  document.querySelectorAll(".bookToggle").forEach(function(b){b.onclick=function(){
+    var t=b.dataset.book;
+    S.bookPreviewOpen[t]=!S.bookPreviewOpen[t];
+    render();
+  }});
+
+  // Everyday-phrase context expand on row click (only rows with context have data-edctx + cursor:pointer)
+  document.querySelectorAll(".ed-row[data-edctx]").forEach(function(row){
+    row.addEventListener("click",function(e){
+      // Don't trigger when the speak button is what was clicked
+      if(e.target.closest(".speak-btn"))return;
+      var k=row.dataset.edctx;
+      if(!S.edOpen)S.edOpen={};
+      S.edOpen[k]=!S.edOpen[k];
+      render();
+    });
+  });
 
   // Media progress
   document.querySelectorAll("[data-media]").forEach(function(b){b.onclick=function(){var key=b.dataset.media;if(!S.mediaProgress)S.mediaProgress={};S.mediaProgress[key]=!S.mediaProgress[key];saveState();render()}});
