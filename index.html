@@ -1352,7 +1352,10 @@ function recordQuizScore(name,pct){
   sbInsertScore(name,pct).then(function(){setTimeout(loadLeaderboard,500)});
 }
 
-function renderLeaderboard(){
+function renderLeaderboard(opts){
+  opts=opts||{};
+  var maxRows=opts.maxRows||0; // 0 = no cap
+  var compact=!!opts.compact;
   var entries=Object.keys(S.quizLeaderboard).map(function(n){
     var e=S.quizLeaderboard[n];
     var hasPeak=!!e.peak;
@@ -1363,12 +1366,28 @@ function renderLeaderboard(){
     var weighted=e.avg*(1+0.15*(peak-1));
     return{name:n,last:e.last,avg:e.avg,count:e.count,peak:peak,hasPeak:hasPeak,weighted:Math.round(weighted)};
   });
-  if(!entries.length)return'';
+  // Header (always shown — even loading/empty — so the section is never invisible)
+  var h='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;display:flex;align-items:center;gap:6px">🏆 Leaderboard <span style="font-weight:500;text-transform:none;color:#aaa">(skill-weighted)</span>'+(S.lbLoading?'<span style="font-weight:500;text-transform:none;color:#bbb;font-size:11px;margin-left:auto">loading…</span>':'')+'</div>';
+  // Loading state — Supabase fetch in flight, no scores yet hydrated
+  if(S.lbLoading&&!entries.length){
+    h+='<div class="card" style="padding:18px;text-align:center;color:#888;font-size:13px">Loading scores…</div>';
+    return h;
+  }
+  // Empty state — no scores recorded yet
+  if(!entries.length){
+    h+='<div class="card" style="padding:20px;text-align:center;background:#f8f7fa;border:2px dashed #ddd">';
+    h+='<div style="font-size:32px;margin-bottom:8px">🏁</div>';
+    h+='<div style="font-size:14px;font-weight:600;color:#444;margin-bottom:4px">No scores yet</div>';
+    h+='<div style="font-size:12px;color:#888;line-height:1.5">Be the first on the board — take a quiz and your score will sync to the shared leaderboard. Other quiz takers from your device will show up here too.</div>';
+    if(!compact)h+='<div style="font-size:10px;color:#bbb;margin-top:10px">Score = avg × (1 + 0.15 × (peak − 1))</div>';
+    h+='</div>';
+    return h;
+  }
   entries.sort(function(a,b){return b.weighted-a.weighted});
-  var h='<div style="font-size:12px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px">🏆 Leaderboard <span style="font-weight:500;text-transform:none;color:#aaa">(skill-weighted)</span></div>';
+  var capped=maxRows>0?entries.slice(0,maxRows):entries;
   h+='<div class="card" style="padding:0;overflow:hidden">';
   h+='<div style="display:grid;grid-template-columns:28px 1fr 44px 44px 44px 36px;gap:6px;padding:10px 12px;background:#f5f3ee;font-size:10px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.3px"><div>#</div><div>Name</div><div style="text-align:right">Avg</div><div style="text-align:right">Peak</div><div style="text-align:right">Score</div><div style="text-align:right">N</div></div>';
-  entries.forEach(function(e,i){
+  capped.forEach(function(e,i){
     var medal=i===0?"🥇":i===1?"🥈":i===2?"🥉":(i+1);
     var peakDots="";
     if(e.hasPeak){
@@ -1377,10 +1396,16 @@ function renderLeaderboard(){
       // Unknown peak (legacy Supabase entry, no local cache)
       peakDots='<span style="font-size:11px;color:#ccc">—</span>';
     }
-    h+='<div style="display:grid;grid-template-columns:28px 1fr 44px 44px 44px 36px;gap:6px;padding:11px 12px;border-top:1px solid #eee;font-size:12px;align-items:center"><div style="font-weight:600">'+medal+'</div><div style="font-weight:600;font-size:13px">'+esc(e.name)+'</div><div style="text-align:right;color:#666">'+e.avg+'%</div><div style="text-align:right">'+peakDots+'</div><div style="text-align:right;font-weight:700;color:#4caf50">'+e.weighted+'</div><div style="text-align:right;color:#888">'+e.count+'</div></div>';
+    var isMe=ACTIVE.name&&e.name===ACTIVE.name;
+    var rowBg=isMe?"background:#fff8e1;":"";
+    h+='<div style="display:grid;grid-template-columns:28px 1fr 44px 44px 44px 36px;gap:6px;padding:11px 12px;border-top:1px solid #eee;font-size:12px;align-items:center;'+rowBg+'"><div style="font-weight:600">'+medal+'</div><div style="font-weight:600;font-size:13px">'+esc(e.name)+(isMe?' <span style="font-size:9px;color:#f9a825;font-weight:700">YOU</span>':'')+'</div><div style="text-align:right;color:#666">'+e.avg+'%</div><div style="text-align:right">'+peakDots+'</div><div style="text-align:right;font-weight:700;color:#4caf50">'+e.weighted+'</div><div style="text-align:right;color:#888">'+e.count+'</div></div>';
   });
+  // Show "+ N more" footer if capped
+  if(maxRows>0&&entries.length>maxRows){
+    h+='<button data-go="quiz" style="display:block;width:100%;padding:10px;background:none;border:none;border-top:1px solid #eee;font-size:11px;font-weight:600;color:#4caf50;font-family:inherit;cursor:pointer">View all '+entries.length+' players · Take a quiz →</button>';
+  }
   h+='</div>';
-  h+='<div style="font-size:10px;color:#aaa;margin:6px 4px 0;line-height:1.5">Score = avg × (1 + 0.15 × (peak − 1)). Harder questions earn more — better students always rank higher.</div>';
+  if(!compact)h+='<div style="font-size:10px;color:#aaa;margin:6px 4px 0;line-height:1.5">Score = avg × (1 + 0.15 × (peak − 1)). Harder questions earn more — better students always rank higher.</div>';
   return h;
 }
 
@@ -1587,6 +1612,11 @@ function renderHome(){
     h+='</div>';
   });
   h+='</div>';
+
+  // Leaderboard preview (top 5) — kicks off Supabase fetch on first home render too,
+  // so even users who never visit the Quiz tab still see the live scoreboard.
+  if(!S._lbBootstrapped){S._lbBootstrapped=true;loadLeaderboard()}
+  h+=renderLeaderboard({maxRows:5,compact:true});
 
   return h;
 }
