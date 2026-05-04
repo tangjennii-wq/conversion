@@ -986,7 +986,9 @@ function persistActive(){
     lessonChats:S.lessonChats,
     lessonView:S.lessonView,
     flashBoxes:S.flashBoxes,
-    streak:S.streak
+    streak:S.streak,
+    mediaNotes:S.mediaNotes,
+    notebook:{notes:(S.notebook&&S.notebook.notes)||[]}
   };
   encryptProgress(ACTIVE.key,data).then(function(blob){
     localStorage.setItem("ivrit_p_"+ACTIVE.name,JSON.stringify(blob));
@@ -1004,6 +1006,8 @@ function applyProfileData(data){
   S.lessonView=data.lessonView||null;
   S.flashBoxes=data.flashBoxes||{};
   S.streak=data.streak||{count:0,lastDay:null,longest:0};
+  S.mediaNotes=data.mediaNotes||{};
+  S.notebook={notes:(data.notebook&&data.notebook.notes)||[],openId:null,search:"",filterTag:null,preview:false};
 }
 
 function logout(){
@@ -1016,6 +1020,8 @@ function logout(){
   S.streak={count:0,lastDay:null,longest:0};
   S.owlOpen=false;S.owlMsg=null;S.owlAiMsg=null;
   S.subpage=null;S.lessonView=null;
+  S.mediaNotes={};S.notesOpen={};
+  S.notebook={notes:[],openId:null,search:"",filterTag:null,preview:false};
   S.page="home";
   // quizName stays — it's a device-level convenience, not per-profile
   render();
@@ -1321,7 +1327,12 @@ var S = {
   // Daily streak
   streak:{count:0, lastDay:null, longest:0},
   // Hootie the owl
-  owlOpen:false, owlMsg:null, owlBusy:false, owlAiMsg:null
+  owlOpen:false, owlMsg:null, owlBusy:false, owlAiMsg:null,
+  // Notes — per-media-item (quick notes attached to a book/podcast/etc.)
+  mediaNotes:{}, // {itemKey: "free text"}
+  notesOpen:{}, // {itemKey: bool} — whether the per-item notes panel is expanded
+  // Standalone notebook (Apple Notes / Notion hybrid)
+  notebook:{notes:[], openId:null, search:"", filterTag:null, preview:false}
 };
 
 // Plain localStorage load disabled — progress now lives in encrypted profiles.
