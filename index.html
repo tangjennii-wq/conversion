@@ -316,6 +316,62 @@ var LIFECYCLE = [
   ]}
 ];
 
+// CONCEPT CARDS — content-focused flashcards (less Hebrew-heavy)
+// Each card has a topic/term on the front and a substantive explanation on the back.
+var CONCEPT_CARDS = [
+  // History
+  {t:"Abraham",h:"~1800 BCE",m:"The first patriarch. Walked away from idolatry in Ur to follow God. The covenant of circumcision (Genesis 17) makes him the founding figure of Jewish peoplehood.",c:"As a convert, you take the name 'bat Avraham v'Sarah.'"},
+  {t:"The Exodus",h:"~1300 BCE",m:"The Israelites' liberation from slavery in Egypt under Moses. Foundational story of Jewish identity — retold every Pesach for over 2,000 years.",c:"'In every generation, see yourself as if YOU left Egypt.'"},
+  {t:"Sinai & The Torah",h:"After the Exodus",m:"At Mount Sinai, the Israelites received the Torah. The people responded 'na'aseh v'nishma' — 'we will do, and we will hear.' Practice precedes theology.",c:"This is when Israel became a covenanted people, not just a family."},
+  {t:"The First Temple",h:"~957 BCE",m:"Built by King Solomon in Jerusalem. The center of Israelite worship for ~400 years. Destroyed by the Babylonians in 586 BCE.",c:"Sacrifices, festivals, and pilgrimage three times a year all centered here."},
+  {t:"The Babylonian Exile",h:"586-539 BCE",m:"After the First Temple's destruction, Jewish elites were exiled to Babylon. Without a Temple, they invented synagogue, Torah-centered prayer, and portable identity. The hinge of Jewish history.",c:"Almost everything 'Jewish' as we know it was forged here."},
+  {t:"The Second Temple",h:"516 BCE - 70 CE",m:"Rebuilt under Persian rule. Center of worship until destroyed by Rome. The era when sects (Pharisees, Sadducees, Essenes, early Christians) competed.",c:"Tisha B'Av mourns its destruction."},
+  {t:"The Bar Kokhba Revolt",h:"132-135 CE",m:"The last great Jewish military rebellion against Rome. Briefly successful, then crushed. After it, the rabbis chose: no more swords. The book would have to be enough — for 1,800 years.",c:"That decision held until Zionism."},
+  {t:"The Mishnah",h:"~200 CE",m:"The first written collection of Jewish oral law, compiled by Rabbi Yehudah HaNasi. Six 'Orders,' 63 tractates. Foundation of all later rabbinic Judaism.",c:"Mishnah + Gemara = Talmud."},
+  {t:"The Babylonian Talmud",h:"~500 CE",m:"Mishnah plus centuries of rabbinic discussion (Gemara). The central text of post-biblical Judaism. Not a code — an argument. 2,711 pages.",c:"Daf Yomi: study one page a day → finish in 7.5 years."},
+  {t:"Maimonides (Rambam)",h:"1138-1204",m:"Greatest medieval Jewish thinker. Wrote 'Mishneh Torah' (legal code) and 'Guide for the Perplexed' (philosophy). Personal physician to the sultan of Egypt. The 13 Principles of Faith are his.",c:"'From Moses to Moses, there was none like Moses.'"},
+  {t:"Rashi",h:"1040-1105",m:"French commentator whose interpretations are printed alongside the Torah and Talmud on every page. Clear, plain-meaning focused.",c:"Almost every text-study session in the world uses Rashi."},
+  {t:"The Spanish Expulsion",h:"1492",m:"Ferdinand and Isabella expelled all Jews from Spain. ~200,000 left; ~50,000 stayed by converting (conversos). The Sephardi heartland was destroyed overnight.",c:"Same year as Columbus. Refugees settled across the Mediterranean and Ottoman world."},
+  {t:"Tzfat (Safed) Mysticism",h:"16th century",m:"After the expulsion, mystics and scholars gathered in this small Galilee town. Yosef Karo wrote the Shulchan Aruch. Rabbi Isaac Luria developed Lurianic Kabbalah.",c:"Lecha Dodi — the Friday night welcome of Shabbat — was composed here."},
+  {t:"The Baal Shem Tov",h:"~1700-1760",m:"Founded Hasidism in southern Poland. Emphasized direct emotional experience of God, joy in worship, and the role of the rebbe as spiritual guide.",c:"Brought Kabbalistic ideas to ordinary Jews."},
+  {t:"Moses Mendelssohn",h:"1729-1786",m:"Father of the Haskalah (Jewish Enlightenment). Argued Judaism is compatible with rational European citizenship: 'Be a Jew at home and a man in the street.'",c:"Translated the Torah into German."},
+  {t:"The Pogroms",h:"1881-1921",m:"Wave of state-encouraged anti-Jewish violence in the Russian Empire. Triggered the largest Jewish migration in history — ~2 million Jews left Eastern Europe, mostly for the US.",c:"Most North American Jewish families descend from this migration."},
+  {t:"Theodor Herzl",h:"1860-1904",m:"Founder of political Zionism. Wrote 'The Jewish State' (1896) after covering the antisemitic Dreyfus Affair. Convened the First Zionist Congress in 1897.",c:"He died at 44, having spent his last years exhausted by the work."},
+  {t:"The Holocaust (Shoah)",h:"1933-1945",m:"Systematic Nazi murder of ~6 million Jews — two-thirds of European Jewry. The world of European Jewish life was largely annihilated mid-flourish.",c:"Hebrew word 'Shoah' (catastrophe) is now generally preferred over 'Holocaust.'"},
+  {t:"The Warsaw Ghetto Uprising",h:"April-May 1943",m:"Largest urban Jewish uprising of the war. About 700 fighters held out against Nazi forces for nearly a month before being crushed. Led by Mordechai Anielewicz.",c:"Refutes the myth that Jews 'went like sheep.'"},
+  {t:"Founding of Israel",h:"May 14, 1948",m:"David Ben-Gurion declared the State of Israel as the British Mandate ended. Surrounding Arab states attacked the next day. Israel survived.",c:"The first Jewish sovereignty in 1,800+ years."},
+  {t:"The Six-Day War",h:"1967",m:"Israel preempted an Arab attack and in six days captured the West Bank, East Jerusalem, Gaza, Sinai, and the Golan Heights. The territorial map of the modern conflict was set.",c:"The reunification of Jerusalem was an enormous emotional moment for Jews worldwide."},
+  {t:"Yom Kippur War",h:"1973",m:"Egypt and Syria launched a surprise attack on Israel's holiest day. Initial Israeli losses were heavy; eventual recovery shattered post-1967 confidence and led to peace with Egypt.",c:"~2,500 Israeli soldiers died — a national trauma."},
+  {t:"Camp David Accords",h:"1978-1979",m:"Israeli PM Begin and Egyptian President Sadat made peace, brokered by US President Carter. Israel returned the Sinai. Sadat was assassinated in 1981 for it.",c:"First peace treaty between Israel and an Arab state."},
+  {t:"October 7, 2023",h:"Recent",m:"Hamas launched a surprise attack from Gaza, killing ~1,200 Israelis and taking ~250 hostages. The largest one-day mass killing of Jews since the Holocaust.",c:"Reshaped Israeli society and Jewish identity worldwide."},
+
+  // Concepts & values
+  {t:"Tikkun Olam",h:"תיקון עולם",m:"'Repairing the world.' The obligation to make the world more just and whole. From Lurianic Kabbalah's image of gathering scattered sparks of holiness.",c:"Now used broadly for Jewish social justice and ethical action."},
+  {t:"B'tzelem Elohim",h:"בצלם אלוהים",m:"'In the image of God.' The Torah's claim (Genesis 1:27) that every human is made in God's image. Foundation of Jewish ethics and modern human rights theory.",c:"'Whoever destroys a single life, it is as if they destroyed an entire world.'"},
+  {t:"PaRDeS",h:"Four levels",m:"Acronym for four layers of Torah interpretation: Peshat (plain), Remez (hint), Drash (homiletic), Sod (mystical). All four are valid simultaneously.",c:"The Torah is not exhausted by any one reading."},
+  {t:"Halakhah",h:"הלכה",m:"'The way' or 'the walking.' Jewish law — the body of rules and customs that govern observant Jewish life. Reform Judaism treats halakhah as evolving guidance, not fixed obligation.",c:"From the root meaning 'to walk' — law as a path you walk."},
+  {t:"Mussar",h:"Character work",m:"A spiritual discipline focused on cultivating middot (character traits): humility, patience, gratitude, generosity. Founded by Rabbi Israel Salanter in 19th-century Lithuania.",c:"Modern revival led by Alan Morinis — see 'Everyday Holiness.'"},
+  {t:"Maimonides' 8 Levels of Tzedakah",h:"Levels 1-8",m:"From lowest (giving reluctantly) to highest (helping someone become self-sufficient). The point: ongoing dependency itself is a kind of harm.",c:"The goal of tzedakah is its own obsolescence."},
+  {t:"The 13 Principles of Faith",h:"Maimonides",m:"Maimonides' creedal summary of Jewish belief — including God's existence, oneness, incorporeality, the truth of prophecy, the Messiah, and resurrection of the dead.",c:"Sung as the hymn Yigdal in synagogues."},
+  {t:"The Three Pillars",h:"Pirkei Avot 1:2",m:"'The world stands on three things: Torah (study), Avodah (service/prayer), and Gemilut Chasadim (acts of lovingkindness).' Said by Shimon HaTzaddik.",c:"A useful frame for evaluating your own Jewish life."},
+  {t:"39 Categories of Melakhah",h:"Shabbat work",m:"Traditional list of activities forbidden on Shabbat — derived from the categories of work used to build the Tabernacle. Includes writing, lighting fire (now electricity), carrying outside, cooking, sewing.",c:"Reform interprets these flexibly: step out of the workweek, don't fixate on lists."},
+  {t:"Lurianic Kabbalah",h:"16th c. mysticism",m:"Cosmic vision: God 'contracted' (tzimtzum) to make space for creation. Divine vessels shattered, scattering holy sparks. Human action gathers the sparks — that's tikkun.",c:"Made every Jewish action cosmically significant."},
+  {t:"Daf Yomi",h:"Daily page",m:"Global practice of studying one page of Talmud per day, completing the entire 2,711-page Babylonian Talmud in ~7.5 years. Started 1923 by Rabbi Meir Shapiro.",c:"13th cycle began January 2020; completes 2027."},
+  {t:"The Oven of Akhnai",h:"Bava Metzia 59",m:"The famous Talmudic story: rabbis defy a literal heavenly voice to insist Torah interpretation belongs to humans. God laughs and says 'My children have defeated me.'",c:"Founding myth of rabbinic interpretive authority."},
+  {t:"Kavanah vs. Keva",h:"Heart vs. structure",m:"Two poles of Jewish prayer: kavanah (intention, spiritual focus) and keva (fixed liturgy, repeated structure). Real prayer balances both — neither alone suffices.",c:"You can recite all the words and be absent. You can be present and have nothing to say. Tradition gives you both."},
+  {t:"Chosenness (Am Hanivchar)",h:"Chosen people",m:"The idea that Israel was chosen for purpose, not privilege. Reform Judaism reinterprets this as a special calling rather than ontological superiority. Amos: 'You only have I known... therefore I will punish you for all your iniquities.'",c:"Being chosen means more responsibility, not less."},
+  {t:"Olam HaBa",h:"World to come",m:"The 'next world' — afterlife, messianic age, or both depending on interpretation. Jewish thought is famously vague here. The focus is THIS world.",c:"'All Israel have a share in olam haba' (Mishnah)."},
+  {t:"Pikuach Nefesh",h:"Saving life",m:"The principle that preserving life overrides almost all other commandments. You must break Shabbat to save a life. You must eat on Yom Kippur if it threatens your health.",c:"Life is sacred above ritual."},
+  {t:"Ger / Conversion",h:"גר (stranger/convert)",m:"The biblical word for both 'stranger' and 'convert.' The Torah commands love of the ger 36 times — more than any other commandment — because 'you were strangers in Egypt.'",c:"Ruth is the archetypal ger."},
+
+  // Movements & denominations
+  {t:"Reform Judaism",h:"Born 1810s",m:"Born in Germany. Argues Judaism is a living religion that adapts to modernity. Egalitarian. Recognizes patrilineal descent (1983). Largest movement in North America.",c:"Your stream."},
+  {t:"Conservative Judaism",h:"Born mid-1800s",m:"Middle path between Reform and Orthodox. Keeps halakhah authoritative but treats it as evolving. Ordains women rabbis (1985), accepts same-sex marriage (2012).",c:"Founded in Germany; matured in early 20th-century America."},
+  {t:"Orthodox Judaism",h:"Self-defined traditional",m:"Committed to traditional halakhah as binding law. Subdivides into Modern Orthodox, Yeshivish, and Hasidic. Fastest-growing branch due to higher birth rates.",c:"The term 'Orthodox' was originally a Reform slur, adopted by traditionalists."},
+  {t:"Hasidism",h:"18th century onward",m:"A spiritual revival movement emphasizing joy, song, ecstatic prayer, devotion to a rebbe, and bringing mystical experience to ordinary Jews. Founded by the Baal Shem Tov.",c:"Most Hasidic groups (Chabad, Satmar, Belz, Bobov) are named for towns of origin."},
+  {t:"Reconstructionist Judaism",h:"Founded 1920s-30s",m:"Mordecai Kaplan's vision: Judaism as an evolving civilization rather than a religion. Less concerned with belief, more with peoplehood and ethics.",c:"Smallest of the major denominations but disproportionately influential."}
+];
+
 // DY Course data
 var DY_COURSE = [
   {section:"Intro to the Darshan Yeshiva",items:["Introduction to our program","Conversion to Judaism: A History","Rabbi Patrick Podcast: Are You Legitimately Jewish?","Introduction to Jewish Identity","Rabbi Patrick Podcast: Circumcision, Bet Din and Mikvah"]},
@@ -1936,14 +1992,146 @@ function renderSub(){
   return h;
 }
 
+// ═══════════════ NOTES HELPERS ═══════════════
+function notesKey(type,name){return type+"::"+String(name||"")}
+function notesCount(key){var v=S.mediaNotes&&S.mediaNotes[key];return v&&v.trim()?v.trim().length:0}
+function renderItemNotes(key){
+  // Inline expandable notes textarea attached to a media item.
+  var open=!!(S.notesOpen&&S.notesOpen[key]);
+  var val=(S.mediaNotes&&S.mediaNotes[key])||"";
+  var count=val.trim().length;
+  var label=count?'📝 Notes ('+count+' chars)':'📝 Add notes';
+  var h='<div style="margin-top:10px;border-top:1px dashed #e5e0d6;padding-top:8px">';
+  h+='<button class="notesToggle" data-nkey="'+esc(key)+'" style="background:none;border:none;padding:4px 0;font-family:inherit;font-size:12px;font-weight:600;color:'+(count?"#7c4dff":"#888")+';cursor:pointer">'+label+' '+(open?"▾":"▸")+'</button>';
+  if(open){
+    h+='<textarea class="itemNote" data-nkey="'+esc(key)+'" placeholder="Jot thoughts as you read/listen…" style="width:100%;min-height:90px;margin-top:6px;border:1.5px solid #e0e0e0;border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;line-height:1.5;outline:none;resize:vertical;background:#fffdf6">'+esc(val)+'</textarea>';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px"><span style="font-size:10px;color:#aaa">Auto-saved · '+count+' chars</span>';
+    h+='<button class="notesSendToNotebook" data-nkey="'+esc(key)+'" style="background:none;border:none;font-size:11px;color:#4caf50;font-family:inherit;cursor:pointer;font-weight:600">Send to Notebook ↗</button></div>';
+  }
+  h+='</div>';
+  return h;
+}
+
+// ═══════════════ NOTEBOOK HELPERS ═══════════════
+function nbId(){return "n_"+Date.now().toString(36)+"_"+Math.random().toString(36).slice(2,7)}
+function nbAll(){return (S.notebook&&S.notebook.notes)||[]}
+function nbGet(id){return nbAll().filter(function(n){return n.id===id})[0]||null}
+function nbCreate(seed){
+  var now=Date.now();
+  var n={id:nbId(),title:(seed&&seed.title)||"",body:(seed&&seed.body)||"",tags:(seed&&seed.tags)||[],pinned:false,created:now,updated:now};
+  if(!S.notebook)S.notebook={notes:[],openId:null,search:"",filterTag:null,preview:false};
+  S.notebook.notes.unshift(n);
+  S.notebook.openId=n.id;
+  S.notebook.preview=false;
+  saveState();
+  return n;
+}
+function nbUpdate(id,fn){
+  var n=nbGet(id);if(!n)return;
+  fn(n);n.updated=Date.now();
+  saveState();
+}
+function nbDelete(id){
+  if(!S.notebook)return;
+  S.notebook.notes=S.notebook.notes.filter(function(n){return n.id!==id});
+  if(S.notebook.openId===id)S.notebook.openId=null;
+  saveState();
+}
+function nbAllTags(){
+  var t={};
+  nbAll().forEach(function(n){(n.tags||[]).forEach(function(tg){t[tg]=(t[tg]||0)+1})});
+  return Object.keys(t).sort(function(a,b){return t[b]-t[a]});
+}
+function nbFormatDate(ts){
+  if(!ts)return "";
+  var d=new Date(ts),now=new Date();
+  var sameDay=d.toDateString()===now.toDateString();
+  if(sameDay)return d.toLocaleTimeString([],{hour:"numeric",minute:"2-digit"});
+  var diff=(now-d)/86400000;
+  if(diff<7)return d.toLocaleDateString([],{weekday:"short"});
+  return d.toLocaleDateString([],{month:"short",day:"numeric"});
+}
+function nbTitleOf(n){
+  if(n.title&&n.title.trim())return n.title;
+  // Apple-Notes-style: first non-empty line of body becomes the title
+  var firstLine=(n.body||"").split("\n").filter(function(s){return s.trim()})[0]||"";
+  return firstLine.replace(/^#+\s*/,"").replace(/^[->*]\s*\[[ x]\]\s*/,"").replace(/^[->*]\s*/,"").trim()||"Untitled note";
+}
+function nbPreviewOf(n){
+  // Take a snippet from the body, skipping the title-ish first line if it's empty title.
+  var body=n.body||"";
+  if(!n.title||!n.title.trim()){
+    var lines=body.split("\n").filter(function(s){return s.trim()});
+    body=lines.slice(1).join(" ");
+  }
+  body=body.replace(/[#*>`]/g,"").replace(/\s+/g," ").trim();
+  return body.slice(0,80)+(body.length>80?"…":"");
+}
+
+// Tiny markdown renderer — supports headings, bullets, checkboxes, blockquotes,
+// bold/italic, line breaks. Intentionally minimal so it's predictable.
+function mdRender(src){
+  src=String(src||"");
+  // Escape HTML first
+  var out=esc(src);
+  // Block-level: split into lines
+  var lines=out.split("\n");
+  var html="",i=0,inUL=false,inOL=false;
+  function closeLists(){if(inUL){html+="</ul>";inUL=false}if(inOL){html+="</ol>";inOL=false}}
+  for(i=0;i<lines.length;i++){
+    var ln=lines[i];
+    var m;
+    // Headings
+    if((m=ln.match(/^### (.*)$/))){closeLists();html+='<h4 style="font-size:14px;margin:10px 0 4px;font-weight:700">'+m[1]+'</h4>';continue}
+    if((m=ln.match(/^## (.*)$/))){closeLists();html+='<h3 style="font-size:16px;margin:12px 0 4px;font-weight:700">'+m[1]+'</h3>';continue}
+    if((m=ln.match(/^# (.*)$/))){closeLists();html+='<h2 style="font-size:19px;margin:14px 0 6px;font-weight:700">'+m[1]+'</h2>';continue}
+    // Checkbox bullet  - [ ] / - [x]
+    if((m=ln.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/))){
+      if(!inUL){closeLists();html+='<ul style="list-style:none;padding-left:4px;margin:4px 0">';inUL=true}
+      var checked=m[1].toLowerCase()==="x";
+      html+='<li class="mdCheck" data-mdline="'+i+'" style="display:flex;gap:8px;align-items:flex-start;padding:3px 0;cursor:pointer"><span style="display:inline-block;width:16px;height:16px;border-radius:4px;border:1.5px solid '+(checked?"#4caf50":"#bbb")+';background:'+(checked?"#4caf50":"#fff")+';color:#fff;font-size:11px;line-height:14px;text-align:center;flex-shrink:0;margin-top:2px">'+(checked?"✓":"")+'</span><span style="flex:1;'+(checked?"color:#999;text-decoration:line-through":"")+'">'+m[2]+'</span></li>';
+      continue;
+    }
+    // Plain bullet
+    if((m=ln.match(/^[-*]\s+(.*)$/))){
+      if(!inUL){closeLists();html+='<ul style="padding-left:20px;margin:4px 0">';inUL=true}
+      html+='<li style="margin:2px 0">'+m[1]+'</li>';
+      continue;
+    }
+    // Numbered list
+    if((m=ln.match(/^\d+\.\s+(.*)$/))){
+      if(!inOL){closeLists();html+='<ol style="padding-left:22px;margin:4px 0">';inOL=true}
+      html+='<li style="margin:2px 0">'+m[1]+'</li>';
+      continue;
+    }
+    // Blockquote
+    if((m=ln.match(/^&gt;\s*(.*)$/))){
+      closeLists();
+      html+='<blockquote style="border-left:3px solid #d1c8b6;padding:4px 12px;margin:6px 0;color:#666;font-style:italic;background:#faf7f0;border-radius:4px">'+m[1]+'</blockquote>';
+      continue;
+    }
+    // Empty line
+    if(!ln.trim()){closeLists();html+='<div style="height:6px"></div>';continue}
+    // Default paragraph
+    closeLists();
+    html+='<p style="margin:4px 0;line-height:1.55">'+ln+'</p>';
+  }
+  closeLists();
+  // Inline: bold **x**, italic *x*, code `x`
+  html=html.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  html=html.replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<em>$2</em>');
+  html=html.replace(/`([^`\n]+)`/g,'<code style="background:#f4f1ea;padding:1px 5px;border-radius:4px;font-size:.9em">$1</code>');
+  return html||'<p style="color:#aaa;font-style:italic">Empty note. Start typing…</p>';
+}
+
 function renderMedia(){
   var h='<h2 style="margin-bottom:6px">Media & Resources</h2>';
   h+='<p style="font-size:13px;color:#888;margin-bottom:14px">From rB\'s resource list — ⭐ items are your priorities</p>';
 
   var mediaTab=S.mediaTab||"books";
   h+='<div class="tab-row">';
-  ["books","podcasts","youtube","blogs"].forEach(function(t){
-    h+='<button class="tab-btn '+(mediaTab===t?"active":"")+'" data-mtab="'+t+'">'+({books:"📚 Books",podcasts:"🎙️ Podcasts",youtube:"📺 YouTube",blogs:"🌐 Blogs/Sites"}[t])+'</button>';
+  ["books","podcasts","youtube","blogs","notebook"].forEach(function(t){
+    h+='<button class="tab-btn '+(mediaTab===t?"active":"")+'" data-mtab="'+t+'">'+({books:"📚 Books",podcasts:"🎙️ Podcasts",youtube:"📺 YouTube",blogs:"🌐 Blogs/Sites",notebook:"📔 Notebook"}[t])+'</button>';
   });
   h+='</div>';
 
@@ -1953,13 +2141,15 @@ function renderMedia(){
     h+='<div style="font-size:11px;color:#888;margin-bottom:10px;font-style:italic">🎧 Tap a book to expand the Audible-listener preview — what it\'s about, main teaching points, how to listen</div>';
     MEDIA.priority_books.forEach(function(b){
       var open=!!S.bookPreviewOpen[b.t];
+      var nk=notesKey("book",b.t);
       h+='<div class="card" style="border-left:4px solid #f9a825;background:'+b.color+';padding:0;overflow:hidden">';
       h+='<button class="bookToggle" data-book="'+esc(b.t)+'" style="background:none;border:none;padding:18px 20px;text-align:left;width:100%;cursor:pointer;font-family:inherit;display:block">';
-      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div style="font-size:15px;font-weight:700">'+esc(b.t)+'</div><div style="font-size:13px;color:#666;margin-top:2px">'+esc(b.a)+'</div></div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0"><span class="tag" style="background:#f9a825;color:#fff">'+b.tag+'</span><span style="font-size:14px;color:#888">'+(open?"▾":"▸")+'</span></div></div>';
+      h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div><div style="font-size:15px;font-weight:700">'+esc(b.t)+'</div><div style="font-size:13px;color:#666;margin-top:2px">'+esc(b.a)+'</div>'+(notesCount(nk)?'<div style="font-size:10px;color:#7c4dff;font-weight:600;margin-top:4px">📝 '+notesCount(nk)+' chars of notes</div>':'')+'</div><div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0"><span class="tag" style="background:#f9a825;color:#fff">'+b.tag+'</span><span style="font-size:14px;color:#888">'+(open?"▾":"▸")+'</span></div></div>';
       h+='</button>';
       if(open&&BOOK_PREVIEWS[b.t]){
         h+='<div style="padding:0 20px 18px">';
         h+=renderBookPreview(b.t,"#f9a825");
+        h+=renderItemNotes(nk);
         h+='</div>';
       }
       h+='</div>';
@@ -1970,17 +2160,20 @@ function renderMedia(){
     MEDIA.completed_books.forEach(function(b){
       var open=!!S.bookPreviewOpen[b.t];
       var hasPrev=!!BOOK_PREVIEWS[b.t];
-      h+='<div class="card" style="padding:0;overflow:hidden;'+(hasPrev?"":"opacity:.7")+'">';
+      var nk=notesKey("book",b.t);
+      h+='<div class="card" style="padding:0;overflow:hidden;'+(hasPrev?"":"opacity:.85")+'">';
       if(hasPrev){
         h+='<button class="bookToggle" data-book="'+esc(b.t)+'" style="background:none;border:none;padding:18px 20px;text-align:left;width:100%;cursor:pointer;font-family:inherit;display:block">';
         h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="flex:1"><div style="font-size:14px;font-weight:600">'+esc(b.t)+'</div><div style="font-size:12px;color:#888">'+esc(b.a)+'</div>';
         if(b.note)h+='<div style="font-size:11px;color:#4caf50;margin-top:4px">'+esc(b.note)+'</div>';
+        if(notesCount(nk))h+='<div style="font-size:10px;color:#7c4dff;font-weight:600;margin-top:4px">📝 '+notesCount(nk)+' chars of notes</div>';
         h+='</div><span style="font-size:14px;color:#888;flex-shrink:0">'+(open?"▾":"▸")+'</span></div>';
         h+='</button>';
-        if(open){h+='<div style="padding:0 20px 18px">'+renderBookPreview(b.t,"#4caf50")+'</div>'}
+        if(open){h+='<div style="padding:0 20px 18px">'+renderBookPreview(b.t,"#4caf50")+renderItemNotes(nk)+'</div>'}
       }else{
         h+='<div style="padding:18px 20px"><div style="font-size:14px;font-weight:600;text-decoration:line-through">'+esc(b.t)+'</div><div style="font-size:12px;color:#888">'+esc(b.a)+'</div>';
         if(b.note)h+='<div style="font-size:11px;color:#4caf50;margin-top:4px">'+esc(b.note)+'</div>';
+        h+=renderItemNotes(nk);
         h+='</div>';
       }
       h+='</div>';
@@ -2000,26 +2193,159 @@ function renderMedia(){
 
   else if(mediaTab==="podcasts"){
     MEDIA.podcasts.forEach(function(p){
-      h+='<div class="card"><div style="font-size:15px;font-weight:600">🎙️ '+esc(p.name)+'</div><div style="font-size:13px;color:#888;margin-top:2px">'+esc(p.host)+'</div></div>';
+      var nk=notesKey("pod",p.name);
+      h+='<div class="card"><div style="font-size:15px;font-weight:600">🎙️ '+esc(p.name)+'</div><div style="font-size:13px;color:#888;margin-top:2px">'+esc(p.host)+'</div>';
+      h+=renderItemNotes(nk);
+      h+='</div>';
     });
   }
 
   else if(mediaTab==="youtube"){
     MEDIA.youtube.forEach(function(y){
+      var nk=notesKey("yt",y.name);
       h+='<div class="card"><div style="font-size:15px;font-weight:600">📺 '+esc(y.name)+'</div>';
       if(y.desc)h+='<div style="font-size:13px;color:#888;margin-top:2px">'+esc(y.desc)+'</div>';
+      h+=renderItemNotes(nk);
       h+='</div>';
     });
   }
 
   else if(mediaTab==="blogs"){
     MEDIA.blogs.forEach(function(b){
+      var nk=notesKey("blog",b.name);
       h+='<div class="card"><div style="font-size:15px;font-weight:600">🌐 '+esc(b.name)+'</div>';
       if(b.url)h+='<div style="font-size:12px;color:#4caf50;margin-top:2px">'+esc(b.url)+'</div>';
+      h+=renderItemNotes(nk);
       h+='</div>';
     });
   }
 
+  else if(mediaTab==="notebook"){
+    h+=renderNotebook();
+  }
+
+  return h;
+}
+
+// ═══════════════ NOTEBOOK VIEW ═══════════════
+function renderNotebook(){
+  if(!S.notebook)S.notebook={notes:[],openId:null,search:"",filterTag:null,preview:false};
+  var openId=S.notebook.openId;
+  if(openId){
+    var n=nbGet(openId);
+    if(n)return renderNoteEditor(n);
+    S.notebook.openId=null;
+  }
+  // ─── List view ───
+  var all=nbAll();
+  var search=(S.notebook.search||"").trim().toLowerCase();
+  var filterTag=S.notebook.filterTag;
+  var filtered=all.filter(function(n){
+    if(filterTag&&(!n.tags||n.tags.indexOf(filterTag)<0))return false;
+    if(!search)return true;
+    var hay=(nbTitleOf(n)+" "+(n.body||"")+" "+((n.tags||[]).join(" "))).toLowerCase();
+    return hay.indexOf(search)>=0;
+  });
+  var pinned=filtered.filter(function(n){return n.pinned});
+  var rest=filtered.filter(function(n){return !n.pinned}).sort(function(a,b){return b.updated-a.updated});
+
+  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><div style="flex:1;font-size:13px;color:#888">📔 '+all.length+' note'+(all.length===1?"":"s")+(filterTag?' · filtered by <b style="color:#7c4dff">#'+esc(filterTag)+'</b>':"")+'</div><button id="nbNew" class="btn btn-primary btn-sm" style="background:#7c4dff;padding:8px 14px;font-size:13px">+ New note</button></div>';
+
+  // Search
+  h+='<input id="nbSearch" placeholder="🔍 Search notes…" value="'+esc(S.notebook.search||"")+'" style="width:100%;border:1.5px solid #e0e0e0;border-radius:10px;padding:10px 14px;font-size:14px;font-family:inherit;outline:none;margin-bottom:10px;background:#fff">';
+
+  // Tag chips
+  var tags=nbAllTags();
+  if(tags.length||filterTag){
+    h+='<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">';
+    if(filterTag)h+='<button class="nbClearTag" style="background:#ede7f6;color:#7c4dff;border:none;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">✕ clear filter</button>';
+    tags.forEach(function(t){
+      var active=filterTag===t;
+      h+='<button class="nbTagChip" data-tag="'+esc(t)+'" style="background:'+(active?"#7c4dff":"#f0ede5")+';color:'+(active?"#fff":"#666")+';border:none;border-radius:14px;padding:5px 12px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">#'+esc(t)+'</button>';
+    });
+    h+='</div>';
+  }
+
+  if(!all.length){
+    h+='<div class="card" style="padding:30px 20px;text-align:center;background:#faf7f0;border:2px dashed #e5dec8">';
+    h+='<div style="font-size:42px;margin-bottom:10px">📔</div>';
+    h+='<div style="font-size:15px;font-weight:600;margin-bottom:6px">Your notebook is empty</div>';
+    h+='<div style="font-size:12px;color:#888;line-height:1.5;margin-bottom:14px">Apple Notes / Notion-style: jot reflections, save quotes from rB, sketch out drash ideas. Markdown formatting (headings, bullets, checkboxes), tags, search, pinning — all here.</div>';
+    h+='<button id="nbNewEmpty" class="btn btn-primary" style="background:#7c4dff;width:auto;padding:10px 22px">+ Create your first note</button>';
+    h+='</div>';
+    return h;
+  }
+  if(!filtered.length){
+    h+='<div class="card" style="padding:24px;text-align:center;color:#888;font-size:13px">No notes match. Try a different search or tag.</div>';
+    return h;
+  }
+  if(pinned.length){
+    h+='<div style="font-size:11px;font-weight:700;color:#f9a825;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📌 Pinned</div>';
+    pinned.forEach(function(n){h+=renderNoteCard(n,true)});
+    h+='<div style="height:10px"></div>';
+  }
+  if(rest.length){
+    if(pinned.length)h+='<div style="font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">All notes</div>';
+    rest.forEach(function(n){h+=renderNoteCard(n,false)});
+  }
+  return h;
+}
+
+function renderNoteCard(n,pinned){
+  var title=nbTitleOf(n);
+  var prev=nbPreviewOf(n);
+  var date=nbFormatDate(n.updated);
+  var tags=(n.tags||[]).map(function(t){return '<span style="background:#ede7f6;color:#7c4dff;padding:1px 7px;border-radius:10px;font-size:10px;font-weight:600;margin-right:4px">#'+esc(t)+'</span>'}).join("");
+  var h='<div class="nbCard" data-noteid="'+n.id+'" style="background:#fff;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,.05);padding:14px 16px;margin-bottom:8px;cursor:pointer;border-left:3px solid '+(pinned?"#f9a825":"transparent")+';transition:transform .1s">';
+  h+='<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><div style="font-size:14px;font-weight:600;color:#1a1a2e;flex:1;line-height:1.3">'+esc(title)+'</div><div style="font-size:10px;color:#aaa;white-space:nowrap">'+date+'</div></div>';
+  if(prev)h+='<div style="font-size:12px;color:#888;margin-top:4px;line-height:1.4">'+esc(prev)+'</div>';
+  if(tags)h+='<div style="margin-top:6px">'+tags+'</div>';
+  h+='</div>';
+  return h;
+}
+
+function renderNoteEditor(n){
+  var preview=!!S.notebook.preview;
+  var h='<div style="display:flex;align-items:center;gap:6px;margin-bottom:10px">';
+  h+='<button id="nbBack" style="background:#f0ede5;border:none;border-radius:10px;padding:8px 12px;font-family:inherit;font-size:13px;color:#666;cursor:pointer">← All notes</button>';
+  h+='<div style="flex:1"></div>';
+  h+='<button id="nbPin" title="Pin" style="background:'+(n.pinned?"#fff8e1":"#f0ede5")+';border:none;border-radius:10px;padding:8px 10px;font-family:inherit;font-size:14px;cursor:pointer">'+(n.pinned?"📌":"📍")+'</button>';
+  h+='<button id="nbPreviewToggle" style="background:'+(preview?"#7c4dff":"#f0ede5")+';color:'+(preview?"#fff":"#666")+';border:none;border-radius:10px;padding:8px 12px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer">'+(preview?"✎ Edit":"👁 Preview")+'</button>';
+  h+='<button id="nbDelete" title="Delete" style="background:#ffebee;color:#c62828;border:none;border-radius:10px;padding:8px 10px;font-family:inherit;font-size:14px;cursor:pointer">🗑</button>';
+  h+='</div>';
+
+  // Title
+  h+='<input id="nbTitle" placeholder="Untitled note" value="'+esc(n.title||"")+'" style="width:100%;border:none;border-bottom:1.5px solid #f0ede5;border-radius:0;padding:6px 2px 10px;font-size:22px;font-weight:700;font-family:inherit;outline:none;margin-bottom:10px;background:transparent">';
+
+  // Tags row
+  var tagChips=(n.tags||[]).map(function(t){return '<span class="nbTagPill" data-tag="'+esc(t)+'" style="background:#ede7f6;color:#7c4dff;border-radius:12px;padding:3px 10px;font-size:11px;font-weight:600;cursor:pointer" title="Click to remove">#'+esc(t)+' ✕</span>'}).join(" ");
+  h+='<div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-bottom:10px">'+tagChips;
+  h+='<input id="nbTagInput" placeholder="+ add tag" style="border:1.5px dashed #e0d8c5;background:transparent;border-radius:12px;padding:3px 10px;font-size:11px;font-family:inherit;outline:none;width:90px">';
+  h+='</div>';
+
+  if(!preview){
+    // Toolbar
+    h+='<div style="display:flex;gap:4px;flex-wrap:wrap;background:#faf7f0;padding:6px;border-radius:10px;margin-bottom:6px">';
+    var btns=[
+      {id:"h",label:"H",title:"Heading","insert":"## "},
+      {id:"b",label:"•",title:"Bullet list","insert":"- "},
+      {id:"c",label:"☐",title:"Checkbox","insert":"- [ ] "},
+      {id:"q",label:"”",title:"Quote","insert":"> "},
+      {id:"n",label:"1.",title:"Numbered","insert":"1. "},
+      {id:"bold",label:"B",title:"Bold","wrap":"**"},
+      {id:"italic",label:"i",title:"Italic","wrap":"*"}
+    ];
+    btns.forEach(function(b){
+      h+='<button class="nbFmt" data-fmt="'+b.id+'" data-insert="'+esc(b.insert||"")+'" data-wrap="'+esc(b.wrap||"")+'" title="'+b.title+'" style="background:#fff;border:1px solid #e8e2d0;border-radius:6px;width:32px;height:30px;font-family:inherit;font-size:13px;font-weight:'+(b.id==="bold"?"700":(b.id==="italic"?"400":"600"))+';font-style:'+(b.id==="italic"?"italic":"normal")+';cursor:pointer;color:#444">'+b.label+'</button>';
+    });
+    h+='</div>';
+    h+='<textarea id="nbBody" placeholder="Start writing… markdown formatting works (## heading, - bullet, - [ ] checkbox, > quote, **bold**, *italic*)." style="width:100%;min-height:340px;border:1.5px solid #f0ede5;border-radius:12px;padding:14px 16px;font-family:inherit;font-size:15px;line-height:1.6;outline:none;resize:vertical;background:#fffdf6">'+esc(n.body||"")+'</textarea>';
+  }else{
+    // Preview
+    h+='<div id="nbPreview" style="background:#fffdf6;border:1.5px solid #f0ede5;border-radius:12px;padding:18px 20px;min-height:340px;font-size:14px;color:#1a1a2e">'+mdRender(n.body)+'</div>';
+  }
+
+  h+='<div style="margin-top:8px;font-size:10px;color:#bbb;text-align:right">Updated '+nbFormatDate(n.updated)+' · auto-saved</div>';
   return h;
 }
 
@@ -2050,18 +2376,35 @@ function renderFlash(){
   h+='</div>';
   h+='<div style="font-size:12px;color:#888;margin-bottom:10px;text-align:center">Card '+(S.flashIdx+1)+' of '+S.flashPool.length+' · this card is in <b style="color:#f9a825">Box '+box+'</b></div>';
 
+  var isConcept=isConceptCard(card);
   h+='<div class="card flashcard" id="flashcard">';
   if(!S.flipped){
-    h+='<div class="translit" style="font-size:24px;font-weight:700;font-style:normal;color:#1a1a2e;margin-bottom:8px">'+card.t+'</div>';
-    h+='<div class="hebrew" style="font-size:28px;color:#888">'+card.h+'</div>';
-    h+='<div class="flip-hint">Tap to reveal meaning</div>';
+    if(isConcept){
+      // Concept/content card — topic on top, era/category subtitle, prompt to flip
+      h+='<div style="font-size:11px;font-weight:700;color:#7c4dff;text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">📜 Concept</div>';
+      h+='<div style="font-size:24px;font-weight:700;color:#1a1a2e;margin-bottom:8px;text-align:center;line-height:1.3">'+card.t+'</div>';
+      if(card.h)h+='<div style="font-size:14px;color:#888;font-style:italic">'+esc(card.h)+'</div>';
+      h+='<div class="flip-hint">Tap to learn more</div>';
+    }else{
+      h+='<div class="translit" style="font-size:24px;font-weight:700;font-style:normal;color:#1a1a2e;margin-bottom:8px">'+card.t+'</div>';
+      h+='<div class="hebrew" style="font-size:28px;color:#888">'+card.h+'</div>';
+      h+='<div class="flip-hint">Tap to reveal meaning</div>';
+    }
   }else{
-    h+='<div class="translit" style="font-size:18px;font-style:normal;color:#999;margin-bottom:4px">'+card.t+'</div>';
-    h+='<div class="hebrew" style="font-size:22px;color:#bbb;margin-bottom:10px">'+card.h+'</div>';
-    h+='<div style="width:60px;height:2px;background:#4caf50;border-radius:2px;margin:0 auto 10px"></div>';
-    h+='<div class="meaning" style="font-size:16px;text-align:center;font-weight:600">'+card.m+'</div>';
-    if(card.c)h+='<div class="context" style="margin-top:10px;text-align:center">'+card.c+'</div>';
-    h+='<button class="speak-btn" data-speak="'+esc(card.h)+'" style="margin-top:10px">🔊 Listen</button>';
+    if(isConcept){
+      h+='<div style="font-size:18px;font-weight:700;color:#1a1a2e;margin-bottom:4px;text-align:center">'+card.t+'</div>';
+      if(card.h)h+='<div style="font-size:13px;color:#999;font-style:italic;margin-bottom:10px">'+esc(card.h)+'</div>';
+      h+='<div style="width:60px;height:2px;background:#7c4dff;border-radius:2px;margin:0 auto 12px"></div>';
+      h+='<div class="meaning" style="font-size:15px;text-align:left;font-weight:500;line-height:1.6">'+card.m+'</div>';
+      if(card.c)h+='<div class="context" style="margin-top:12px;text-align:left">'+card.c+'</div>';
+    }else{
+      h+='<div class="translit" style="font-size:18px;font-style:normal;color:#999;margin-bottom:4px">'+card.t+'</div>';
+      h+='<div class="hebrew" style="font-size:22px;color:#bbb;margin-bottom:10px">'+card.h+'</div>';
+      h+='<div style="width:60px;height:2px;background:#4caf50;border-radius:2px;margin:0 auto 10px"></div>';
+      h+='<div class="meaning" style="font-size:16px;text-align:center;font-weight:600">'+card.m+'</div>';
+      if(card.c)h+='<div class="context" style="margin-top:10px;text-align:center">'+card.c+'</div>';
+      h+='<button class="speak-btn" data-speak="'+esc(card.h)+'" style="margin-top:10px">🔊 Listen</button>';
+    }
   }
   h+='</div>';
 
@@ -2175,7 +2518,122 @@ var KNOWLEDGE_BANK = [
   {q:"What does 'kavanah' mean?",a:"Intention or spiritual focus in prayer",w:["Fixed prayer","Loud prayer","Silent prayer"]},
   {q:"What does 'chesed' mean?",a:"Loving-kindness",w:["Justice","Truth","Peace"]},
   {q:"What is the traditional Jewish greeting meaning 'peace'?",a:"Shalom",w:["Todah","Baruch Hashem","Ahava"]},
-  {q:"What does 'bashert' mean in Yiddish?",a:"Destined one / soulmate",w:["Family","Friend","Teacher"]}
+  {q:"What does 'bashert' mean in Yiddish?",a:"Destined one / soulmate",w:["Family","Friend","Teacher"]},
+
+  // — Expanded content from the Darshan course —
+
+  // Pesach / Seder details
+  {q:"How many cups of wine are drunk at the Passover Seder?",a:"Four",w:["Two","Three","Five"]},
+  {q:"What hidden piece of matzah, found by children, ends the Seder?",a:"Afikomen",w:["Charoset","Maror","Karpas"]},
+  {q:"Which symbolic Seder food represents the mortar Israelite slaves used in Egypt?",a:"Charoset (apple-walnut paste)",w:["Maror","Karpas","Beitzah"]},
+  {q:"What bitter herb on the Seder plate represents the bitterness of slavery?",a:"Maror",w:["Charoset","Karpas","Z'roa"]},
+  {q:"What does 'Mitzrayim' (Egypt) literally mean in Hebrew?",a:"Narrow places",w:["The desert","The river","The empire"]},
+  {q:"How many plagues struck Egypt in the Exodus story?",a:"Ten",w:["Seven","Twelve","Three"]},
+  {q:"What phrase ends the Passover Seder?",a:"L'shanah haba'ah b'Yerushalayim (Next year in Jerusalem)",w:["Shema Yisrael","Baruch HaShem","Mazel tov"]},
+  {q:"For whom is the extra cup of wine on the Seder table set?",a:"Elijah the Prophet",w:["Moses","King David","Abraham"]},
+
+  // High Holy Days details
+  {q:"On which holiday is the shofar blown 100 times?",a:"Rosh Hashanah",w:["Yom Kippur","Sukkot","Simchat Torah"]},
+  {q:"What ritual involves casting bread crumbs into water to symbolically discard sins?",a:"Tashlich",w:["Selichot","Kol Nidre","Neilah"]},
+  {q:"What is the haunting Aramaic prayer that opens Yom Kippur?",a:"Kol Nidre",w:["Aleinu","Avinu Malkeinu","Unetaneh Tokef"]},
+  {q:"What is the closing service of Yom Kippur called?",a:"Neilah",w:["Mussaf","Mincha","Shacharit"]},
+  {q:"What greeting is used between Rosh Hashanah and Yom Kippur?",a:"G'mar Chatimah Tovah (May you be sealed for a good year)",w:["Shanah Tovah","Chag Sameach","Shabbat Shalom"]},
+  {q:"How long is the Yom Kippur fast?",a:"25 hours (sunset to nightfall)",w:["12 hours","24 hours","40 hours"]},
+  {q:"What four species are waved during Sukkot?",a:"Palm, willow, myrtle (lulav), and citron (etrog)",w:["Wheat, barley, grape, fig","Olive, almond, date, pomegranate","Cedar, oak, willow, hyssop"]},
+  {q:"What temporary dwelling is built and eaten in for seven days during Sukkot?",a:"Sukkah",w:["Mikdash","Mishkan","Chuppah"]},
+
+  // Hanukkah details
+  {q:"Whom did the Maccabees defeat to reclaim the Temple?",a:"The Seleucid Greeks (Antiochus IV)",w:["The Romans","The Babylonians","The Persians"]},
+  {q:"In what century BCE did the Hanukkah story take place?",a:"2nd century BCE (167-160 BCE)",w:["6th century BCE","1st century CE","4th century BCE"]},
+  {q:"What is the helper candle on a chanukiah called?",a:"Shamash",w:["Ner Tamid","Havdalah","Menorah"]},
+  {q:"In which direction are Hanukkah candles added each night?",a:"Right to left (lit left to right — newest first)",w:["Left to right","Center outward","All at once"]},
+  {q:"In Israel, the dreidel's letters spell 'Nes Gadol Hayah ___' — fill in the blank.",a:"Po (here)",w:["Sham (there)","Eretz (the land)","Yom (today)"]},
+
+  // Purim details
+  {q:"In which biblical book is the Purim story told?",a:"Esther (Megillat Esther)",w:["Ruth","Daniel","Judges"]},
+  {q:"What name is repeatedly booed during the Megillah reading?",a:"Haman",w:["Mordechai","Ahasuerus","Vashti"]},
+  {q:"What three-cornered pastry is traditionally eaten on Purim?",a:"Hamantaschen",w:["Rugelach","Babka","Sufganiyot"]},
+  {q:"What is the mitzvah of giving food gifts on Purim called?",a:"Mishloach Manot",w:["Matanot la-Evyonim","Tzedakah","Bikkur Cholim"]},
+  {q:"Notably, the Book of Esther never mentions ____.",a:"God",w:["Persia","Jerusalem","Wine"]},
+
+  // Shavuot & Tisha B'Av
+  {q:"What biblical book — about a famous convert — is read on Shavuot?",a:"Ruth",w:["Esther","Job","Song of Songs"]},
+  {q:"What food category is traditionally eaten on Shavuot?",a:"Dairy (cheesecake, blintzes)",w:["Meat","Fish","Sweet pastries only"]},
+  {q:"What all-night Torah study tradition takes place on Shavuot?",a:"Tikkun Leil Shavuot",w:["Selichot","Tashlich","Daf Yomi"]},
+  {q:"What book of the Tanakh is read on Tisha B'Av?",a:"Lamentations (Eichah)",w:["Ecclesiastes","Job","Daniel"]},
+  {q:"What two events are mourned on Tisha B'Av?",a:"The destruction of both Temples",w:["The Exodus and Sinai","Sodom and Gomorrah","Korach's rebellion"]},
+
+  // Israeli national holidays
+  {q:"On what day is Israeli Holocaust Remembrance Day observed?",a:"27 Nisan",w:["10 Tevet","9 Av","20 Iyar"]},
+  {q:"What follows immediately after Yom HaZikaron?",a:"Yom Ha'atzmaut (Israeli Independence Day)",w:["Yom Yerushalayim","Yom HaShoah","Tisha B'Av"]},
+  {q:"What event does Yom Yerushalayim commemorate?",a:"The reunification of Jerusalem in 1967",w:["The fall of the Second Temple","The 1948 War","The Oslo Accords"]},
+
+  // Ancient history
+  {q:"Approximately when did Abraham live, according to traditional dating?",a:"~1800 BCE",w:["~3000 BCE","~600 BCE","~100 CE"]},
+  {q:"Who first received the covenant of circumcision in the Torah?",a:"Abraham",w:["Moses","Noah","Isaac"]},
+  {q:"What is the binding of Isaac called in Hebrew?",a:"The Akedah",w:["The Korban","The Avodah","The Brit"]},
+  {q:"Which patriarch was renamed 'Israel' after wrestling with an angel?",a:"Jacob",w:["Abraham","Isaac","Joseph"]},
+  {q:"How many years did the Israelites wander in the desert?",a:"40",w:["7","70","400"]},
+  {q:"At which mountain did the Israelites receive the Torah?",a:"Mount Sinai",w:["Mount Moriah","Mount Carmel","Mount Zion"]},
+  {q:"Which Israelite king made Jerusalem the capital?",a:"David",w:["Saul","Solomon","Hezekiah"]},
+  {q:"Who built the First Temple in Jerusalem?",a:"King Solomon",w:["King David","King Saul","King Hezekiah"]},
+  {q:"In what year was the First Temple destroyed?",a:"586 BCE (by the Babylonians)",w:["70 CE","135 CE","1492"]},
+  {q:"In what year was the Second Temple destroyed?",a:"70 CE (by the Romans)",w:["586 BCE","135 CE","312 CE"]},
+  {q:"Who was the rabbi who founded the academy at Yavneh after 70 CE, saving rabbinic Judaism?",a:"Yochanan ben Zakkai",w:["Hillel","Akiva","Maimonides"]},
+  {q:"In what year did the Bar Kokhba revolt end?",a:"135 CE",w:["70 CE","312 CE","586 BCE"]},
+  {q:"Who compiled the Mishnah around 200 CE?",a:"Rabbi Yehudah HaNasi",w:["Rashi","Maimonides","Hillel"]},
+
+  // Medieval/Modern figures
+  {q:"What are the Hebrew Bible's three sections (which TaNaKh stands for)?",a:"Torah, Nevi'im, Ketuvim",w:["Torah, Talmud, Midrash","Genesis, Exodus, Deuteronomy","Hebrew, Aramaic, Greek"]},
+  {q:"Which medieval scholar wrote the 'Mishneh Torah' and 'Guide for the Perplexed'?",a:"Maimonides (Rambam)",w:["Rashi","Ibn Ezra","Nachmanides"]},
+  {q:"In what country and century did Maimonides primarily write?",a:"Egypt, 12th century",w:["Spain, 9th century","France, 13th century","Germany, 14th century"]},
+  {q:"Who is the famous 11th-century French commentator whose work appears next to the Torah and Talmud on every page?",a:"Rashi",w:["Rambam","Ramban","Ibn Ezra"]},
+  {q:"Who founded Hasidism in 18th-century Eastern Europe?",a:"The Baal Shem Tov (Israel ben Eliezer)",w:["The Vilna Gaon","Rabbi Israel Salanter","Theodor Herzl"]},
+  {q:"Who founded the Mussar movement in 19th-century Lithuania?",a:"Rabbi Israel Salanter",w:["The Baal Shem Tov","The Vilna Gaon","Moses Mendelssohn"]},
+  {q:"Who is considered the father of the Jewish Enlightenment (Haskalah)?",a:"Moses Mendelssohn",w:["Theodor Herzl","Maimonides","Rashi"]},
+
+  // Zionism, Israel, Holocaust
+  {q:"Who wrote 'Der Judenstaat' (The Jewish State) in 1896?",a:"Theodor Herzl",w:["Ahad Ha'am","David Ben-Gurion","Chaim Weizmann"]},
+  {q:"Who declared the establishment of the State of Israel?",a:"David Ben-Gurion",w:["Theodor Herzl","Chaim Weizmann","Golda Meir"]},
+  {q:"In what year did the Six-Day War take place?",a:"1967",w:["1948","1956","1973"]},
+  {q:"In what year did the Yom Kippur War take place?",a:"1973",w:["1967","1956","1982"]},
+  {q:"With which country did Israel sign its first peace treaty in 1979?",a:"Egypt",w:["Jordan","Syria","Lebanon"]},
+  {q:"In what year did Israel sign a peace treaty with Jordan?",a:"1994",w:["1979","1967","2000"]},
+  {q:"Which Israeli Prime Minister was assassinated in 1995 after a peace rally?",a:"Yitzhak Rabin",w:["Menachem Begin","Ariel Sharon","Golda Meir"]},
+  {q:"In what year did Israel withdraw from the Gaza Strip?",a:"2005",w:["1973","1993","2000"]},
+  {q:"What is the Knesset?",a:"The Israeli parliament",w:["The Israeli Supreme Court","The Israeli army","The Chief Rabbinate"]},
+  {q:"What does 'Aliyah' literally mean?",a:"Going up (also: immigrating to Israel)",w:["Going home","The journey","Returning"]},
+  {q:"At what conference in 1942 did Nazi officials plan the 'Final Solution'?",a:"The Wannsee Conference",w:["The Nuremberg Conference","The Munich Conference","The Berlin Conference"]},
+  {q:"What was the largest urban Jewish uprising during the Holocaust?",a:"The Warsaw Ghetto Uprising (1943)",w:["The Treblinka uprising","The Sobibor revolt","The Vilna uprising"]},
+  {q:"What is Yad Vashem?",a:"Israel's Holocaust memorial and research center",w:["Israel's Supreme Court","Israel's Knesset","Israel's central synagogue"]},
+  {q:"Who organized Israel's capture and trial of Adolf Eichmann in 1961?",a:"The Mossad (in Argentina)",w:["The IDF","The CIA","Interpol"]},
+
+  // Texts & study
+  {q:"What is the Mishnah?",a:"The first written collection of Jewish oral law (~200 CE)",w:["A medieval law code","The Hebrew Bible","Rashi's commentary"]},
+  {q:"Which Talmud is more authoritative and widely studied?",a:"The Babylonian Talmud (Bavli)",w:["The Jerusalem Talmud (Yerushalmi)","Both equally","Neither"]},
+  {q:"What is Daf Yomi?",a:"A daily-page Talmud study cycle (~7.5 years)",w:["A daily Torah portion","A weekly study group","A holiday liturgy"]},
+  {q:"What is the foundational text of Kabbalah, written in 13th-century Spain?",a:"The Zohar",w:["The Mishnah","The Shulchan Aruch","The Mishneh Torah"]},
+  {q:"Who wrote the Shulchan Aruch (the standard Orthodox legal code)?",a:"Yosef Karo (16th century, Tzfat)",w:["Maimonides","Rashi","The Vilna Gaon"]},
+  {q:"What does 'PaRDeS' stand for as four levels of Torah interpretation?",a:"Peshat, Remez, Drash, Sod (plain, hint, interpretation, mystery)",w:["Past, Present, Direct, Symbolic","Prophets, Rabbis, Drashot, Songs","Practice, Reason, Dialogue, Spirit"]},
+  {q:"How many parshiyot (weekly portions) does the Torah have?",a:"54",w:["12","49","613"]},
+  {q:"Whose famous 13 Principles of Faith are recited as the hymn Yigdal?",a:"Maimonides",w:["Rashi","Hillel","The Baal Shem Tov"]},
+
+  // Lifecycle & practices
+  {q:"On what day of life is brit milah traditionally performed?",a:"The 8th day",w:["The 1st day","The 30th day","The 13th day"]},
+  {q:"For how many months do mourners traditionally say Kaddish for a parent?",a:"11 months (Ashkenazi tradition)",w:["7 days","30 days","12 months"]},
+  {q:"What is the 30-day reduced mourning period after burial called?",a:"Shloshim",w:["Shiva","Yahrzeit","Yizkor"]},
+  {q:"What memorial prayer is said four times a year in synagogue?",a:"Yizkor",w:["Kaddish","Aleinu","Mi Sheberach"]},
+  {q:"What are the 'three pillars' of Judaism according to Pirkei Avot?",a:"Torah, Avodah (service/prayer), Gemilut Chasadim (acts of kindness)",w:["Faith, Hope, Love","Prayer, Fasting, Charity","Study, Service, Silence"]},
+  {q:"What is the highest level of tzedakah, according to Maimonides?",a:"Helping someone become self-sufficient",w:["Giving the largest gift","Giving anonymously","Giving cheerfully"]},
+  {q:"What is the traditional tithe percentage of income for tzedakah?",a:"10% (ma'aser)",w:["1%","5%","20%"]},
+
+  // Prayer & synagogue
+  {q:"Which prayer is said three times daily, standing and facing Jerusalem?",a:"The Amidah (Shemoneh Esrei)",w:["The Shema","Kaddish","Aleinu"]},
+  {q:"How many blessings are in the weekday Amidah?",a:"19",w:["7","13","18"]},
+  {q:"How many Hebrew letters are in the alef-bet?",a:"22",w:["18","26","27"]},
+  {q:"What is the Kabbalat Shabbat hymn that welcomes Shabbat as a bride?",a:"Lecha Dodi",w:["Yedid Nefesh","Adon Olam","Aleinu"]},
+  {q:"In which 16th-century town was Lurianic Kabbalah developed?",a:"Tzfat (Safed)",w:["Jerusalem","Hebron","Tiberias"]},
+  {q:"Who developed Lurianic Kabbalah?",a:"Rabbi Isaac Luria (the Ari)",w:["Moses de Leon","Yosef Karo","The Baal Shem Tov"]}
 ];
 
 function generateQuiz(){
@@ -2201,11 +2659,15 @@ function generateQuiz(){
     pool.push({type:"knowledge",prompt:k.q,opts:kopts,correct:kpos,answer:k.a,picked:null,difficulty:rateKnowledge(k)});
   });
 
-  // Vocab questions
-  var cards=getAllCards();
-  cards.forEach(function(card){
+  // Vocab questions — only Hebrew vocab cards (concept cards are tested via knowledge questions)
+  var allCards=getAllCards();
+  var vocabCards=allCards.filter(function(c){return !isConceptCard(c)});
+  // Cap vocab questions so the quiz isn't dominated by Hebrew matching — content/knowledge takes priority
+  var maxVocab=Math.min(40,vocabCards.length);
+  var sampledVocab=shuffle(vocabCards.slice()).slice(0,maxVocab);
+  sampledVocab.forEach(function(card){
     var wrongs=[];
-    var pool2=shuffle(cards.slice());
+    var pool2=shuffle(vocabCards.slice());
     for(var m=0;m<pool2.length&&wrongs.length<3;m++){
       if(pool2[m].t!==card.t&&pool2[m].m!==card.m&&!wrongs.some(function(w){return w===pool2[m].m})){
         wrongs.push(pool2[m].m);
@@ -2473,6 +2935,8 @@ function renderChat(){
 // ═══════════════ HELPERS ═══════════════
 function getAllCards(){
   var cards=[];
+  // CONCEPT_CARDS first — content/history/concept cards (less Hebrew-heavy)
+  CONCEPT_CARDS.forEach(function(c){cards.push(c)});
   EVERYDAY.forEach(function(p){cards.push(p)});
   VOCAB.forEach(function(v){cards.push(v)});
   HOLIDAYS.forEach(function(ho){ho.phrases.forEach(function(p){cards.push({h:p.h,t:p.t,m:p.m,c:ho.name})})});
@@ -2484,6 +2948,14 @@ function getAllCards(){
     COURSE_CONTENT[moduleName].forEach(function(item){cards.push(item)});
   });
   return cards;
+}
+
+// Detect if a card is a content/concept card (non-Hebrew front)
+function isConceptCard(card){
+  if(!card||!card.h)return true;
+  // Concept cards have non-Hebrew "h" field (dates/eras/labels)
+  // Real Hebrew cards contain at least one Hebrew letter (Unicode ֐-׿)
+  return !/[֐-׿]/.test(card.h);
 }
 
 function shuffle(arr){
@@ -2733,6 +3205,173 @@ function bindEvents(){
 
   // Media progress
   document.querySelectorAll("[data-media]").forEach(function(b){b.onclick=function(){var key=b.dataset.media;if(!S.mediaProgress)S.mediaProgress={};S.mediaProgress[key]=!S.mediaProgress[key];saveState();render()}});
+
+  // ── Per-item notes (Media cards) ──
+  document.querySelectorAll(".notesToggle").forEach(function(b){b.onclick=function(e){
+    e.stopPropagation();
+    var k=b.dataset.nkey;
+    if(!S.notesOpen)S.notesOpen={};
+    S.notesOpen[k]=!S.notesOpen[k];
+    render();
+    // Re-focus the textarea after re-render so typing continues smoothly
+    if(S.notesOpen[k])setTimeout(function(){
+      var ta=document.querySelector('.itemNote[data-nkey="'+k.replace(/"/g,'\\"')+'"]');
+      if(ta){ta.focus();ta.setSelectionRange(ta.value.length,ta.value.length)}
+    },50);
+  }});
+  document.querySelectorAll(".itemNote").forEach(function(ta){
+    // Auto-save without re-render so the cursor stays put
+    ta.oninput=function(e){
+      var k=ta.dataset.nkey;
+      if(!S.mediaNotes)S.mediaNotes={};
+      S.mediaNotes[k]=e.target.value;
+      saveState();
+    };
+  });
+  document.querySelectorAll(".notesSendToNotebook").forEach(function(b){b.onclick=function(e){
+    e.stopPropagation();
+    var k=b.dataset.nkey;
+    var val=(S.mediaNotes&&S.mediaNotes[k])||"";
+    if(!val.trim()){alert("Add some notes first.");return}
+    var parts=k.split("::");
+    var typeMap={book:"Book",pod:"Podcast",yt:"YouTube",blog:"Blog"};
+    var typeLabel=typeMap[parts[0]]||"Media";
+    var n=nbCreate({title:typeLabel+": "+parts[1],body:val,tags:[parts[0]]});
+    S.mediaTab="notebook";
+    S.notebook.openId=n.id;
+    render();
+  }});
+
+  // ── Notebook list view ──
+  var nbNew=document.getElementById("nbNew");
+  if(nbNew)nbNew.onclick=function(){nbCreate();render();setTimeout(function(){var t=document.getElementById("nbTitle");if(t)t.focus()},50)};
+  var nbNewE=document.getElementById("nbNewEmpty");
+  if(nbNewE)nbNewE.onclick=function(){nbCreate();render();setTimeout(function(){var t=document.getElementById("nbTitle");if(t)t.focus()},50)};
+  var nbS=document.getElementById("nbSearch");
+  if(nbS)nbS.oninput=function(e){
+    if(!S.notebook)return;
+    S.notebook.search=e.target.value;
+    // Re-render but preserve focus/caret
+    var caret=e.target.selectionStart;
+    render();
+    var ns=document.getElementById("nbSearch");
+    if(ns){ns.focus();try{ns.setSelectionRange(caret,caret)}catch(err){}}
+  };
+  document.querySelectorAll(".nbTagChip").forEach(function(b){b.onclick=function(){
+    if(!S.notebook)return;
+    S.notebook.filterTag=S.notebook.filterTag===b.dataset.tag?null:b.dataset.tag;
+    render();
+  }});
+  document.querySelectorAll(".nbClearTag").forEach(function(b){b.onclick=function(){if(S.notebook)S.notebook.filterTag=null;render()}});
+  document.querySelectorAll(".nbCard").forEach(function(c){c.onclick=function(){
+    if(!S.notebook)return;
+    S.notebook.openId=c.dataset.noteid;
+    S.notebook.preview=false;
+    render();
+  }});
+
+  // ── Notebook editor ──
+  var nbBack=document.getElementById("nbBack");
+  if(nbBack)nbBack.onclick=function(){
+    if(!S.notebook)return;
+    S.notebook.openId=null;
+    S.notebook.preview=false;
+    render();
+  };
+  var nbTitle=document.getElementById("nbTitle");
+  if(nbTitle)nbTitle.oninput=function(e){
+    var id=S.notebook&&S.notebook.openId;if(!id)return;
+    nbUpdate(id,function(n){n.title=e.target.value});
+  };
+  var nbBody=document.getElementById("nbBody");
+  if(nbBody){
+    nbBody.oninput=function(e){
+      var id=S.notebook&&S.notebook.openId;if(!id)return;
+      nbUpdate(id,function(n){n.body=e.target.value});
+    };
+    // Tab key inserts two spaces (don't lose focus)
+    nbBody.onkeydown=function(e){
+      if(e.key==="Tab"){
+        e.preventDefault();
+        var s=nbBody.selectionStart,en=nbBody.selectionEnd;
+        nbBody.value=nbBody.value.slice(0,s)+"  "+nbBody.value.slice(en);
+        nbBody.selectionStart=nbBody.selectionEnd=s+2;
+        nbBody.dispatchEvent(new Event("input"));
+      }
+    };
+  }
+  var nbPin=document.getElementById("nbPin");
+  if(nbPin)nbPin.onclick=function(){
+    var id=S.notebook&&S.notebook.openId;if(!id)return;
+    nbUpdate(id,function(n){n.pinned=!n.pinned});
+    render();
+  };
+  var nbDel=document.getElementById("nbDelete");
+  if(nbDel)nbDel.onclick=function(){
+    var id=S.notebook&&S.notebook.openId;if(!id)return;
+    if(confirm("Delete this note? This cannot be undone."))nbDelete(id),render();
+  };
+  var nbPv=document.getElementById("nbPreviewToggle");
+  if(nbPv)nbPv.onclick=function(){
+    if(!S.notebook)return;
+    S.notebook.preview=!S.notebook.preview;
+    render();
+  };
+  // Format toolbar — operate on textarea selection
+  document.querySelectorAll(".nbFmt").forEach(function(b){b.onclick=function(){
+    var ta=document.getElementById("nbBody");if(!ta)return;
+    var ins=b.dataset.insert||"",wrap=b.dataset.wrap||"";
+    var s=ta.selectionStart,en=ta.selectionEnd;
+    if(ins){
+      // Insert at start of current line
+      var before=ta.value.slice(0,s),after=ta.value.slice(s);
+      var nl=before.lastIndexOf("\n");
+      var lineStart=nl+1;
+      ta.value=ta.value.slice(0,lineStart)+ins+ta.value.slice(lineStart);
+      var newPos=s+ins.length;
+      ta.selectionStart=ta.selectionEnd=newPos;
+    }else if(wrap){
+      var sel=ta.value.slice(s,en)||"text";
+      ta.value=ta.value.slice(0,s)+wrap+sel+wrap+ta.value.slice(en);
+      ta.selectionStart=s+wrap.length;
+      ta.selectionEnd=s+wrap.length+sel.length;
+    }
+    ta.focus();
+    ta.dispatchEvent(new Event("input"));
+  }});
+  // Tag input — Enter or comma to add
+  var nbTagIn=document.getElementById("nbTagInput");
+  if(nbTagIn)nbTagIn.onkeydown=function(e){
+    if(e.key==="Enter"||e.key===","){
+      e.preventDefault();
+      var v=nbTagIn.value.trim().replace(/^#/,"").replace(/[\s,]+/g,"-");
+      if(!v)return;
+      var id=S.notebook&&S.notebook.openId;if(!id)return;
+      nbUpdate(id,function(n){if(!n.tags)n.tags=[];if(n.tags.indexOf(v)<0)n.tags.push(v)});
+      nbTagIn.value="";
+      render();
+    }
+  };
+  document.querySelectorAll(".nbTagPill").forEach(function(p){p.onclick=function(){
+    var id=S.notebook&&S.notebook.openId;if(!id)return;
+    var t=p.dataset.tag;
+    nbUpdate(id,function(n){n.tags=(n.tags||[]).filter(function(x){return x!==t})});
+    render();
+  }});
+  // Clickable checkboxes in preview mode — toggle the underlying markdown
+  document.querySelectorAll(".mdCheck").forEach(function(li){li.onclick=function(){
+    var id=S.notebook&&S.notebook.openId;if(!id)return;
+    var lineIdx=parseInt(li.dataset.mdline);
+    nbUpdate(id,function(n){
+      var lines=(n.body||"").split("\n");
+      if(lines[lineIdx]){
+        if(/\[ \]/.test(lines[lineIdx]))lines[lineIdx]=lines[lineIdx].replace("[ ]","[x]");
+        else if(/\[x\]/i.test(lines[lineIdx]))lines[lineIdx]=lines[lineIdx].replace(/\[x\]/i,"[ ]");
+        n.body=lines.join("\n");
+      }
+    });
+    render();
+  }});
 
   // Survey inputs
   document.querySelectorAll("[data-sv]").forEach(function(el){
