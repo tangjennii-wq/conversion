@@ -316,6 +316,29 @@ var LIFECYCLE = [
   ]}
 ];
 
+// ESSENTIAL_HEBREW — the only Hebrew vocab that appears in flashcards.
+// Just the truly major words: greetings, holiday names, a handful of core concepts.
+// The full vocabulary lives in the Learn tab; flashcards stay content-heavy.
+var ESSENTIAL_HEBREW = [
+  {h:"שָׁלוֹם",t:"Shalom",m:"Hello / Goodbye / Peace — the most universal Hebrew greeting.",c:"Literally means 'peace.' Use it for hello, goodbye, and as a wish."},
+  {h:"שַׁבָּת שָׁלוֹם",t:"Shabbat Shalom",m:"'Peaceful Sabbath' — the standard Friday night / Saturday greeting.",c:"Said from Friday evening through Saturday night."},
+  {h:"חַג שָׂמֵחַ",t:"Chag Sameach",m:"'Happy holiday' — universal greeting for any Jewish holiday.",c:"Use it on Rosh Hashanah, Sukkot, Pesach, Shavuot, Hanukkah, Purim — any festival."},
+  {h:"שָׁנָה טוֹבָה",t:"Shanah Tovah",m:"'Good year' — the Rosh Hashanah greeting.",c:"Longer form: 'L'shanah tovah tikatevu' (may you be inscribed for a good year)."},
+  {h:"מַזָּל טוֹב",t:"Mazel Tov",m:"'Congratulations!' / 'Good luck!' — said at weddings, b'nai mitzvah, births, all happy occasions.",c:"Literally 'good constellation.' Adopted into English."},
+  {h:"לְחַיִּים",t:"L'chaim",m:"'To life!' — the classic Jewish toast.",c:"Said before drinking wine or spirits at a celebration."},
+  {h:"תּוֹדָה",t:"Todah",m:"'Thank you.'",c:"'Todah rabah' = thank you very much."},
+  {h:"מִצְוָה",t:"Mitzvah",m:"'Commandment' or 'good deed.' There are 613 in the Torah; colloquially, any kind act.",c:"'Bar/Bat Mitzvah' = son/daughter of the commandment."},
+  {h:"צְדָקָה",t:"Tzedakah",m:"'Righteousness' — obligatory giving. Not charity (optional) but justice (required).",c:"From the same root as 'tzedek' (justice)."},
+  {h:"תִּקּוּן עוֹלָם",t:"Tikkun Olam",m:"'Repairing the world' — the obligation to make the world more just and whole.",c:"Now used broadly for Jewish social justice."},
+  {h:"רֹאשׁ הַשָּׁנָה",t:"Rosh Hashanah",m:"The Jewish New Year. Falls in September/October. Apples and honey for a sweet year.",c:"Literally 'head of the year.'"},
+  {h:"יוֹם כִּפּוּר",t:"Yom Kippur",m:"Day of Atonement. The holiest day of the year. 25-hour fast, white clothing, deep introspection.",c:"Falls 10 days after Rosh Hashanah."},
+  {h:"פֶּסַח",t:"Pesach",m:"Passover — commemorates the Exodus from Egypt. The Seder is the central ritual.",c:"From the verb meaning 'to pass over' — God passed over the Israelite homes."},
+  {h:"חֲנֻכָּה",t:"Hanukkah",m:"Festival of Lights. 8 nights of candle lighting. Commemorates the Maccabean victory and the miracle of the oil.",c:"Falls in December."},
+  {h:"פּוּרִים",t:"Purim",m:"Celebrates the Jewish escape from Haman in ancient Persia. Costumes, the Megillah, hamantaschen, joyful drinking.",c:"Falls in late February or March."},
+  {h:"סֻכּוֹת",t:"Sukkot",m:"Festival of Booths. Build a sukkah and eat in it for 7 days. Wave the lulav and etrog.",c:"Falls 5 days after Yom Kippur."},
+  {h:"שָׁבוּעוֹת",t:"Shavuot",m:"Celebrates receiving the Torah at Sinai. All-night Torah study, dairy foods, the Book of Ruth.",c:"Falls 7 weeks after Pesach. Your holiday as a convert — Ruth's holiday."}
+];
+
 // CONCEPT CARDS — content-focused flashcards (less Hebrew-heavy)
 // Each card has a topic/term on the front and a substantive explanation on the back.
 var CONCEPT_CARDS = [
@@ -369,7 +392,75 @@ var CONCEPT_CARDS = [
   {t:"Conservative Judaism",h:"Born mid-1800s",m:"Middle path between Reform and Orthodox. Keeps halakhah authoritative but treats it as evolving. Ordains women rabbis (1985), accepts same-sex marriage (2012).",c:"Founded in Germany; matured in early 20th-century America."},
   {t:"Orthodox Judaism",h:"Self-defined traditional",m:"Committed to traditional halakhah as binding law. Subdivides into Modern Orthodox, Yeshivish, and Hasidic. Fastest-growing branch due to higher birth rates.",c:"The term 'Orthodox' was originally a Reform slur, adopted by traditionalists."},
   {t:"Hasidism",h:"18th century onward",m:"A spiritual revival movement emphasizing joy, song, ecstatic prayer, devotion to a rebbe, and bringing mystical experience to ordinary Jews. Founded by the Baal Shem Tov.",c:"Most Hasidic groups (Chabad, Satmar, Belz, Bobov) are named for towns of origin."},
-  {t:"Reconstructionist Judaism",h:"Founded 1920s-30s",m:"Mordecai Kaplan's vision: Judaism as an evolving civilization rather than a religion. Less concerned with belief, more with peoplehood and ethics.",c:"Smallest of the major denominations but disproportionately influential."}
+  {t:"Reconstructionist Judaism",h:"Founded 1920s-30s",m:"Mordecai Kaplan's vision: Judaism as an evolving civilization rather than a religion. Less concerned with belief, more with peoplehood and ethics.",c:"Smallest of the major denominations but disproportionately influential."},
+
+  // Holidays — deeper concepts
+  {t:"The Pesach Seder",h:"15 steps",m:"The ritual Passover meal. 15 ordered steps. Children ask the Four Questions. Four cups of wine. Bitter herbs, charoset, matzah. The longest-running educational ritual in human history — performed continuously for 2,000+ years.",c:"'In every generation, see yourself as if YOU left Egypt.'"},
+  {t:"The Four Questions",h:"Mah nishtanah",m:"Asked by the youngest child at the Seder: Why is this night different? Why matzah, not bread? Why bitter herbs? Why dipping? Why reclining? The questions structure the entire telling of the Exodus story.",c:"Every kid memorizes the Hebrew for years."},
+  {t:"Kol Nidre",h:"Yom Kippur opening",m:"A haunting Aramaic legal formula chanted three times at the start of Yom Kippur. Annuls vows made under duress. The melody is one of the most recognized in Jewish music — Beethoven and Bruch both adapted it.",c:"Some communities trace it to 6th-century Babylon; it's structurally bizarre but emotionally devastating."},
+  {t:"Neilah",h:"Yom Kippur close",m:"The final service of Yom Kippur, said as the gates of repentance are 'closing.' Ends with one long blast of the shofar and the cry 'L'shanah ha-ba'ah b'Yerushalayim' (Next year in Jerusalem).",c:"After 25 hours of fasting, this is when most people break — emotionally and physically."},
+  {t:"The Lulav & Etrog",h:"Sukkot",m:"The 'Four Species' waved in six directions during Sukkot: palm (lulav), willow, myrtle, and citron (etrog). The midrash compares them to four kinds of Jew — those with Torah and good deeds, one without the other, and those with neither — all bound together.",c:"A good etrog can cost over $100; collectors look for one with the perfect 'pittom' (tip)."},
+  {t:"Simchat Torah",h:"23 Tishrei",m:"Celebrates completing the annual Torah reading cycle and immediately starting over. Dancing with Torah scrolls — wild, joyful, sometimes drunken processions called hakafot.",c:"For converts, often one of the most powerful nights of the year."},
+  {t:"The Maccabean Revolt",h:"167-160 BCE",m:"Mattathias and his sons led a guerrilla rebellion against Antiochus IV's prohibition of Judaism. They won, rededicated the Temple (Hanukkah's origin), and founded the Hasmonean dynasty.",c:"The miracle of the oil is the Talmudic legend; the original story is as much military as miraculous."},
+  {t:"The Megillah",h:"Book of Esther",m:"Read on Purim, twice (evening and morning). The congregation boos at every mention of Haman, often with noisemakers (graggers). Notably, the entire book never mentions God.",c:"Esther hides her Jewishness; God is hidden too. The whole book is about hiddenness."},
+  {t:"Tikkun Leil Shavuot",h:"All-night study",m:"The custom of staying up all night studying Torah on Shavuot. Originated in 16th-century Tzfat (Safed) with the Kabbalists. Now practiced widely in liberal communities.",c:"Cheesecake is involved."},
+  {t:"The Counting of the Omer",h:"49 days",m:"A 49-day count from Pesach to Shavuot. Originally agricultural (between barley and wheat harvests). Mystically: a period of self-refinement, with each week tied to a divine attribute (sefirah).",c:"Lag B'Omer (33rd day) is a break from semi-mourning customs."},
+
+  // Lifecycle expanded
+  {t:"Brit Milah",h:"8th day",m:"Circumcision of a Jewish boy on the 8th day of life — the original covenant Abraham made with God in Genesis 17. Performed by a mohel (ritual circumciser). The baby receives his Hebrew name.",c:"For male converts, the ritual is brit milah or hatafat dam brit (a symbolic drop of blood if already circumcised)."},
+  {t:"Simchat Bat",h:"Naming for girls",m:"The naming ceremony for newborn Jewish girls — a relatively new tradition (20th century) that parallels brit milah. No fixed liturgy; many families create their own.",c:"Driven by the egalitarian impulse of liberal Judaism."},
+  {t:"Bar/Bat Mitzvah",h:"Coming of age",m:"At 13 (boys) or 12-13 (girls), a Jewish child becomes responsible for the commandments. The ritual: an aliyah to the Torah, often a d'var Torah (sermon), followed by a celebration. Means 'son/daughter of the commandment.'",c:"The party is not the point. The aliyah is."},
+  {t:"The Chuppah",h:"Wedding canopy",m:"The four-poled canopy under which a Jewish wedding takes place. Symbolizes the new home the couple is building. Open on all sides — recalling Abraham and Sarah's tent, hospitable in every direction.",c:"Often made from a tallit, sometimes from a family heirloom."},
+  {t:"Breaking the Glass",h:"Wedding climax",m:"The groom (or both partners) crushes a glass underfoot at the wedding's end. Recalls the destruction of the Temple even at peak joy — and symbolizes that the commitment is unbreakable. Everyone shouts 'Mazel Tov!'",c:"Multiple interpretations, all valid."},
+  {t:"Shiva",h:"Seven days",m:"The seven-day intense mourning period after burial. Mourners stay home, sit on low chairs, cover mirrors, don't shave. Visitors bring food and wait for the mourner to speak first.",c:"From the Hebrew word for seven."},
+  {t:"Kaddish",h:"Mourner's prayer",m:"Said by mourners for 11 months after a parent's death. Strikingly, the prayer never mentions death — it's a soaring praise of God. The genius: in your moment of greatest grief, you affirm the goodness of life.",c:"Recited only with a minyan (10 Jewish adults)."},
+  {t:"Yahrzeit",h:"Annual memorial",m:"The Hebrew-calendar anniversary of a death. Light a 24-hour memorial candle the evening before. Say Kaddish. Visit the grave if possible. From the Yiddish for 'year-time.'",c:"Many families commemorate yahrzeit for grandparents and great-grandparents going back generations."},
+
+  // Prayer & worship
+  {t:"The Shema",h:"Central declaration",m:"'Sh'ma Yisrael, Adonai Eloheinu, Adonai Echad' — Hear, O Israel: the Lord our God, the Lord is One. The most important sentence in Judaism. Said morning and evening, when waking and sleeping, and as last words at death.",c:"Cover your eyes when you say it — focus inward."},
+  {t:"The Amidah",h:"Standing prayer",m:"The central prayer of every Jewish service. 19 blessings on weekdays (originally 18; the 19th was added against heretics). Said standing, facing Jerusalem, in a quiet voice. Take three steps back to enter, three forward to leave.",c:"Also called Shemoneh Esrei ('Eighteen')."},
+  {t:"Aleinu",h:"Closing prayer",m:"The closing prayer of every Jewish service. 'It is upon us' — declares the obligation of Israel to praise God. Originally for the High Holy Days; later moved to every service. The first paragraph is universalist; the second envisions a redeemed world.",c:"Worth knowing the melody — you'll hear it constantly."},
+  {t:"Lecha Dodi",h:"Friday night hymn",m:"'Come, my beloved, to greet the bride.' The hymn welcoming Shabbat. Composed in 16th-century Tzfat by Rabbi Shlomo Alkabetz. On the last verse, everyone turns to the back to greet the symbolic Shabbat queen.",c:"Sung to dozens of melodies; every synagogue has favorites."},
+  {t:"The Three Daily Services",h:"Shacharit / Mincha / Ma'ariv",m:"Morning, afternoon, evening — three prayer times daily. Tradition says they correspond to the three Temple sacrifice times. Now: prayer replaced sacrifice (Hosea 14:3, 'the offerings of our lips').",c:"On Shabbat and holidays, add Mussaf (additional)."},
+  {t:"Tallit",h:"Prayer shawl",m:"Four-cornered garment with tzitzit (knotted fringes) on each corner. Worn during morning prayers. The fringes are the active commanded item; the garment holds them. Reform: men and women both wear them.",c:"From Numbers 15:38-39 — fringes as a physical reminder of the commandments."},
+  {t:"Tefillin",h:"Phylacteries",m:"Two small leather boxes with Torah verses inside, bound to the arm and forehead during weekday morning prayers. Literal fulfillment of 'bind them as a sign on your hand' (Deut 6:8). Reform: optional.",c:"Wrapped seven times around the arm in a precise sequence."},
+
+  // Biblical figures & stories
+  {t:"Sarah",h:"First matriarch",m:"Wife of Abraham, mother of Isaac. Laughed when told she would bear a son in old age — Yitzchak (Isaac) means 'he laughs.' Strong, sometimes harsh, one of four matriarchs.",c:"Converts take the name 'bat Avraham v'Sarah' — daughter of Abraham AND Sarah."},
+  {t:"Moses",h:"Greatest prophet",m:"Led the Israelites out of slavery in Egypt and received the Torah at Sinai. The Torah calls him 'the most humble man on the face of the earth.' Died in sight of the Promised Land but never entered it.",c:"In Reform circles, an idealist; in Orthodox, the receiver of the divine word."},
+  {t:"Miriam",h:"Sister of Moses",m:"Hid Moses in the reeds as a baby. Led the Israelite women in song after crossing the Red Sea. A prophet in her own right. Tradition says a well of water followed Israel through the desert in her merit.",c:"Reform Seders often add Miriam's Cup of water alongside Elijah's cup of wine."},
+  {t:"Ruth",h:"The original convert",m:"A Moabite widow who chose Israel: 'Whither thou goest, I will go… thy people shall be my people, and thy God my God.' Great-grandmother of King David. Read on Shavuot.",c:"For converts, this is YOUR holiday."},
+  {t:"Esther",h:"Hidden Jewish queen",m:"Jewish queen in the Persian court who saved her people from Haman's genocide. The Book of Esther never mentions God — yet the people clearly act on God's behalf. Read on Purim.",c:"Mordechai's line: 'Who knows whether you came to the kingdom for such a time as this?'"},
+  {t:"King David",h:"~1000 BCE",m:"Killed Goliath as a young shepherd. Conquered Jerusalem and made it the capital. Wrote (or is credited with) the Psalms. Founded the dynasty from which the Messiah will come. Also a deeply flawed person — Bathsheba and Uriah.",c:"The Bible doesn't airbrush him."},
+  {t:"Hillel & Shammai",h:"Rival schools",m:"Two great teachers of the late 1st century BCE. Hillel: lenient, humane, beloved. Shammai: strict, rigorous. Their schools debated for centuries. Hillel usually 'wins' in the Talmud.",c:"Hillel: 'What is hateful to you, do not do to your fellow. That is the whole Torah; the rest is commentary.'"},
+  {t:"Rabbi Akiva",h:"~50-135 CE",m:"Began Torah study at age 40. Became one of the greatest Talmudic sages. Supported Bar Kokhba's failed revolt. Tortured to death by Romans for teaching Torah; died saying the Shema.",c:"His martyrdom is recounted in the Yom Kippur liturgy."},
+
+  // Texts & scholarship
+  {t:"Pirkei Avot",h:"Ethics of the Fathers",m:"A short tractate of Mishnah, only 6 chapters, full of pithy ethical wisdom. Often the first Talmud passage Jewish students encounter. 'Who is wise? One who learns from every person.'",c:"Read in synagogue on Shabbat afternoons between Pesach and Shavuot."},
+  {t:"Midrash",h:"Rabbinic stories",m:"Rabbinic stories and interpretations that fill in gaps and explore the meaning of biblical texts. Not scripture, but companion. Often imaginative, sometimes wild. Compiled in collections like Bereshit Rabbah.",c:"Where the rabbis play with the text rather than lecture about it."},
+  {t:"The Mishneh Torah",h:"Maimonides' code",m:"Maimonides' 14-volume systematic code of Jewish law (12th century). The first attempt to organize halakhah topically. Controversial in its time; foundational since.",c:"Maimonides' goal was to write the only book a Jew would ever need beyond the Torah."},
+  {t:"Sefaria",h:"Online library",m:"Free online library of the Hebrew Bible, Talmud, Mishnah, Midrash, and major commentaries — all linked, all in Hebrew with English translation. Founded 2011. The single greatest tool for learning Jewish texts in human history.",c:"sefaria.org. Bookmark it."},
+
+  // Cultural & community
+  {t:"Yiddish",h:"Ashkenazi mother tongue",m:"A Germanic language with Hebrew, Aramaic, Slavic, and Romance roots, written in Hebrew letters. The daily language of millions of Eastern European Jews until the Holocaust. Now spoken by ~600,000 (mostly Hasidic communities).",c:"Source of: kvell, schlep, mensch, oy vey, chutzpah, and on and on."},
+  {t:"Ladino",h:"Sephardi mother tongue",m:"Judeo-Spanish — the language carried by Spanish Jews after the 1492 expulsion across the Mediterranean. Still spoken (in declining numbers) by older Sephardim in Israel, Turkey, the Balkans, and beyond.",c:"Beautiful folk songs and a dying linguistic world."},
+  {t:"Ashkenazi / Sephardi / Mizrahi",h:"Jewish geographies",m:"The three major Jewish ethnic streams. Ashkenazim trace to medieval Europe. Sephardim to Spain/Portugal (post-1492 dispersed). Mizrahim are from the Middle East and North Africa (never left). About half of Israeli Jews are Mizrahi/Sephardi.",c:"Different prayer rites, foods, music, and Hebrew pronunciations."},
+  {t:"Klezmer",h:"Eastern European music",m:"Traditional instrumental music of Eastern European Jewish weddings and celebrations. Clarinets, fiddles, accordions. Mostly destroyed in the Holocaust; revived in the 1970s. Rich, plaintive, danceable.",c:"The Klezmatics, Frank London — modern revival."},
+  {t:"The Mikveh",h:"Ritual immersion",m:"A pool of natural or rain-collected water used for ritual purification. Used for conversion, monthly purification (taharat hamishpacha), and spiritual renewal. The final step of conversion is three immersions in a mikveh.",c:"You will know Judaism in your body the moment you come up out of the water."},
+
+  // Israel & modern
+  {t:"Hatikvah",h:"Israeli national anthem",m:"'The Hope.' The Israeli national anthem. Written as a Zionist poem in 1878. The melody is adapted from a Romanian folk song (which itself echoes Smetana's 'Vltava').",c:"The closing line: 'To be a free people in our land — the land of Zion and Jerusalem.'"},
+  {t:"The IDF",h:"Israel Defense Forces",m:"Israel's military. Almost universal conscription for Jewish citizens (men 32 months, women 24 months). One of the most capable militaries in the world per capita. Central institution of Israeli society and identity.",c:"Service shapes friendships, careers, politics — much of an Israeli life."},
+  {t:"Kibbutz",h:"Collective community",m:"Originally socialist agricultural collectives founded by Zionist pioneers. The classic kibbutz had no private property, communal child-rearing, equal labor. Today most have privatized but retain communal identity. About 270 still exist.",c:"Once the cultural ideal of Israeli life; now a niche."},
+  {t:"Hebrew Revival",h:"Eliezer Ben-Yehuda",m:"The most extraordinary linguistic story in human history. Hebrew was a liturgical-only language for nearly 2,000 years. Ben-Yehuda obsessively revived it as a modern spoken tongue starting in the 1880s. Now ~9 million native speakers.",c:"He raised his son entirely in Hebrew — making the boy the first native speaker since ancient times."},
+  {t:"Diaspora (Galut)",h:"Jewish dispersal",m:"The Jewish presence outside the Land of Israel. Began with the Babylonian exile (586 BCE). Hebrew word 'galut' carries connotations of estrangement; modern 'tfutzot' (diaspora) is more neutral. Today: ~8.5 million Jews in diaspora vs. ~7.2 million in Israel.",c:"The center of Jewish life is shifting back toward Israel for the first time in 2,500 years."},
+
+  // Concepts & values
+  {t:"Pikuach Nefesh",h:"Saving life overrides",m:"The principle that preserving life overrides almost all commandments. You must break Shabbat to save a life. You must eat on Yom Kippur if it threatens your health. Life is sacred above ritual.",c:"Reform Judaism extends this: psychological wellbeing, dignity, and human flourishing all participate in the principle."},
+  {t:"L'dor V'dor",h:"From generation to generation",m:"The phrase that runs through Jewish liturgy and life: 'l'dor v'dor.' The transmission of tradition, practice, story, and identity across generations. Every generation receives, lives, and passes on.",c:"As a convert, you are now in the chain."},
+  {t:"Klal Yisrael",h:"All of Israel",m:"'The whole community of Israel.' The principle that Jews are responsible for one another, regardless of denomination, geography, or politics. 'Kol Yisrael areivim zeh ba-zeh' — All Israel are responsible for one another.",c:"Aspirational, often violated, still central."},
+  {t:"Asher Yatzar",h:"Bathroom blessing",m:"Yes — a Jewish blessing said after using the bathroom. Thanks God for the proper functioning of the body. Captures something profound: every functional bodily process is a small miracle worth noting.",c:"Liberal Jews rarely say it; the theology is striking."},
+  {t:"Gematria",h:"Letter numerology",m:"Hebrew letters double as numbers (alef=1, bet=2... yud=10, kuf=100, etc.). Gematria assigns numerical values and looks for hidden patterns. Sometimes profound, sometimes pseudoscience. Used in mystical and folk traditions.",c:"The number 18 spells 'chai' (life) — that's why Jews give gifts in multiples of 18."}
 ];
 
 // DY Course data
@@ -801,7 +892,8 @@ var PRAYERS = {
      m:"Blessed are You, Lord our God, Ruler of the universe, Creator of the fruit of the vine.",
      c:"Said over wine or grape juice on Shabbat and holidays. Hold the cup in your right hand.",
      links:[{label:"Video: Wine Blessing",url:"https://drive.google.com/file/d/1xT5Mm-4usiEMQTLmdaPbr-LAm6P2Wugt/view"},
-            {label:"Audio: Wine blessing",url:"https://drive.google.com/file/d/1Qk9CAZC42UIUXn2UMhMypZ0VcuqGLM6a/view"}]},
+            {label:"Audio: Wine sung",url:"https://drive.google.com/file/d/1Qk9CAZC42UIUXn2UMhMypZ0VcuqGLM6a/view"},
+            {label:"Audio: Wine said",url:"https://drive.google.com/open?id=1vvxMJcCzYkB1DNZGeM__7gAKy3HyGcgW"}]},
     {name:"HaMotzi (Bread Blessing)",cat:"Shabbat",
      h:"בָּרוּךְ אַתָּה יהוה, אֱלֹהֵינוּ מֶלֶךְ הָעוֹלָם, הַמּוֹצִיא לֶחֶם מִן הָאָרֶץ",
      t:"Barukh ata Adonai Eloheinu, Melekh ha'olam, hamotzi lechem min ha'aretz.",
@@ -1172,25 +1264,49 @@ function rateVocabCard(card){
 // each card has a "box" 1-5; cards in low boxes appear far more often.
 // Returns an array of cards weighted by 1/box (capped to ~30 cards per session).
 function buildAdaptivePool(){
-  var all=getAllCards();
-  var weighted=[];
-  all.forEach(function(c){
-    var box=S.flashBoxes[c.t]||1;
-    // Weight: box 1 → 5 copies, box 2 → 3, box 3 → 2, box 4 → 1, box 5 → 0.5 (rounded → 1)
-    var w=Math.max(1,Math.round(6-box));
-    if(box>=5)w=1; // mastered cards still appear, just rarely
-    for(var i=0;i<w;i++)weighted.push(c);
-  });
-  // Shuffle and dedupe consecutively (avoid same card twice in a row)
-  weighted=shuffle(weighted);
-  var deduped=[];
-  for(var i=0;i<weighted.length;i++){
-    if(deduped.length===0||deduped[deduped.length-1].t!==weighted[i].t){
-      deduped.push(weighted[i]);
+  // Flashcard deck is content-first: ~95% concept cards, ~5% essential Hebrew.
+  // Vocab/everyday/holiday phrases/course content live in the Learn tab and the Quiz —
+  // they're deliberately excluded from this deck.
+  var SESSION_SIZE=30;
+  var hebrewSlots=Math.max(1,Math.round(SESSION_SIZE*0.05)); // ~2 of 30 = 6.7%, close to 5%
+  var conceptSlots=SESSION_SIZE-hebrewSlots;
+
+  // Helper: weight a list of cards by Leitner box and dedupe consecutive copies.
+  function weightAndPick(list,maxN){
+    var weighted=[];
+    list.forEach(function(c){
+      var box=S.flashBoxes[c.t]||1;
+      var w=Math.max(1,Math.round(6-box));
+      if(box>=5)w=1;
+      for(var i=0;i<w;i++)weighted.push(c);
+    });
+    weighted=shuffle(weighted);
+    var picked=[];
+    var seen={};
+    for(var i=0;i<weighted.length&&picked.length<maxN;i++){
+      var card=weighted[i];
+      if(!seen[card.t]){seen[card.t]=true;picked.push(card)}
+    }
+    return picked;
+  }
+
+  var conceptPicks=weightAndPick(CONCEPT_CARDS,conceptSlots);
+  var hebrewPicks=weightAndPick(ESSENTIAL_HEBREW,hebrewSlots);
+
+  // Interleave so Hebrew cards are scattered, not clumped.
+  var combined=[];
+  var ci=0,hi=0;
+  var hebrewInterval=Math.max(2,Math.floor(conceptPicks.length/Math.max(1,hebrewPicks.length)));
+  for(var n=0;n<conceptPicks.length+hebrewPicks.length;n++){
+    if(hi<hebrewPicks.length&&n>0&&n%hebrewInterval===0){
+      combined.push(hebrewPicks[hi++]);
+    }else if(ci<conceptPicks.length){
+      combined.push(conceptPicks[ci++]);
+    }else if(hi<hebrewPicks.length){
+      combined.push(hebrewPicks[hi++]);
     }
   }
-  // Cap session length at 30
-  return deduped.slice(0,Math.min(30,deduped.length));
+  return combined.slice(0,SESSION_SIZE);
 }
 
 function bumpFlashBox(card,knewIt){
@@ -1513,6 +1629,7 @@ function render(){
     {id:"home",icon:"🏠",label:"Home"},
     {id:"learn",icon:"📚",label:"Learn"},
     {id:"darshan",icon:"🎓",label:"Darshan"},
+    {id:"prayers",icon:"🕯️",label:"Prayers"},
     {id:"flash",icon:"🃏",label:"Cards"},
     {id:"quiz",icon:"❓",label:"Quiz"},
     {id:"media",icon:"📖",label:"Media"},
@@ -1533,6 +1650,7 @@ function render(){
   if(S.page==="home") h=renderHome();
   else if(S.page==="learn") h=S.subpage?renderSub():renderLearn();
   else if(S.page==="darshan"){S.subpage="course";h=renderSub();}
+  else if(S.page==="prayers"){S.subpage="prayers";h=renderSub();}
   else if(S.page==="flash") h=renderFlash();
   else if(S.page==="quiz") h=renderQuiz();
   else if(S.page==="media") h=renderMedia();
@@ -1732,7 +1850,7 @@ function renderLearn(){
 
 function renderSub(){
   var sp=S.subpage;
-  var h=S.page==="darshan"?'':'<button class="btn-sm btn-outline" data-back="learn" style="margin-bottom:14px">← Back</button>';
+  var h=(S.page==="darshan"||S.page==="prayers")?'':'<button class="btn-sm btn-outline" data-back="learn" style="margin-bottom:14px">← Back</button>';
 
   if(sp==="holidays"){
     h+='<h2 style="margin-bottom:14px">Holiday Sayings</h2>';
@@ -3055,7 +3173,7 @@ function bindEvents(){
   // Lesson view is only cleared by the explicit "← Back to Course" button.
   document.querySelectorAll("#nav button").forEach(function(b){b.onclick=function(){
     S.page=b.dataset.pg;
-    S.subpage=(S.page==="darshan"?"course":null);
+    S.subpage=(S.page==="darshan"?"course":(S.page==="prayers"?"prayers":null));
     S.flipped=false;
     // Don't reset lessonView — user wants to resume their last Darshan lesson on return.
     if(S.page==="quiz")loadLeaderboard();
